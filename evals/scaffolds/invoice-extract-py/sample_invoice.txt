@@ -1,0 +1,8 @@
+INVOICE No. 2026-117
+Nordlicht GmbH, Hafenstrasse 4, 20457 Hamburg
+Bill to: Acme Ltd, 1 King St, London
+
+2 x Espresso machine service ........ 480.00 EUR
+1 x Descaling kit .................... 60.00 EUR
+Total due: 540.00 EUR
+Payment due by 21 November 2026

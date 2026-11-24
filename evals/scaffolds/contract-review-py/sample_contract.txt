@@ -1,0 +1,4 @@
+MASTER SERVICES AGREEMENT between Acme Ltd ("Customer") and Brightline Analytics Inc ("Vendor").
+1. Term. This agreement renews automatically for successive 3-year terms unless cancelled 180 days before renewal.
+2. Liability. Customer's liability under this agreement is unlimited.
+3. Governing law. Laws of the Cayman Islands.

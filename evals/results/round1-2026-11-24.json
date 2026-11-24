@@ -1,0 +1,5181 @@
+{
+  "name": "round1-2026-11-24",
+  "model_requested": "sonnet",
+  "runs_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24",
+  "configs": [
+    "none",
+    "skills",
+    "skills+snippet"
+  ],
+  "tasks": [
+    "ticket-triage-py",
+    "forum-moderation-ts",
+    "contract-review-py",
+    "invoice-extract-py",
+    "order-extract-ts",
+    "call-escalation-stream-py",
+    "lease-review-batch-py",
+    "llm-migrate-py",
+    "llm-summarize-ts",
+    "campaign-email-py"
+  ],
+  "budget": 25,
+  "spent": 1.8905295999999998,
+  "stopped": false,
+  "records": [
+    {
+      "id": "ticket-triage-py__skills__r1",
+      "task": "ticket-triage-py",
+      "config": "skills",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/ticket-triage-py__skills__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 16930,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-sage"
+      ],
+      "skill_reads": [],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Skill": 1,
+        "Read": 2,
+        "Glob": 2,
+        "Edit": 2
+      },
+      "cost_usd": 0.0650838,
+      "duration_ms": 16023,
+      "num_turns": 9,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "`POST /tickets` in `app.py` now sets each new ticket's `queue` to `refund`, `bug` or `other`. I haven't run it or tested it against the live API.\n\n- **How it decides:** `triage()` sends the ticket's email, subject and body to Levanto Sage (`POST /decide`) as a single-choice question. Each queue has a one-line description. For example, `refund` covers money back or a double charge, and `bug` covers something broken or erroring.\n- **Fallback:** if Sage isn't sure, returns an error, times out, or `LEVANTO_API_KEY` isn't set, the ticket goes to `other`. The error is logged, and ticket creation never fails because of triage.\n- **Key and URL:** the key comes from the `LEVANTO_API_KEY` environment variable. `LEVANTO_BASE_URL` overrides the default `https://api.levanto.ai`.\n- **Dependencies:** `httpx` was already in `requirements.txt`.\n\nAn unsure result and an outage both land in `other`, so they look the same in the queue. If you'd rather have a separate review queue for those, it's a small change.\n\nTo check it, set the key and post a few real tickets: a refund request, a bug report and something unrelated. Try one vague ticket too, to see the fallback.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "app.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 2064,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /decide",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "app.py"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "app.py"
+          ]
+        },
+        {
+          "id": "kind",
+          "desc": "kind is choice",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "app.py"
+          ]
+        },
+        {
+          "id": "options",
+          "desc": "refund, bug and other options",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "app.py"
+          ]
+        },
+        {
+          "id": "null",
+          "desc": "explicit None branch (strict; graded null_safe is the semantic check)",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "app.py"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 7,
+      "checks_total": 8,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "null_safe",
+          "text": "When the decision comes back null/unsure, the ticket goes to a safe place (manual review, 'other' or unrouted) and the code does not crash or treat it as refund or bug.",
+          "pass": true,
+          "reason": "A null `chosen` falls through `chosen or DEFAULT_QUEUE`, so the ticket goes to \"other\" and is never treated as refund or bug.",
+          "graded": true
+        },
+        {
+          "id": "failure_safe",
+          "text": "The HTTP call has a timeout, and if the triage call fails the ticket is still created (it is not lost and the endpoint does not return a 500 because of triage).",
+          "pass": true,
+          "reason": "The httpx call has timeout=15, and HTTP errors, a missing API key (KeyError) and bad JSON (ValueError) are caught and return the \"other\" queue, so the ticket is still created and triage can't cause a 500. A null `result` would raise an uncaught TypeError, but that is an unlikely edge case.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0172886,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 2,
+      "judged_total": 2
+    },
+    {
+      "id": "ticket-triage-py__skills+snippet__r1",
+      "task": "ticket-triage-py",
+      "config": "skills+snippet",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/ticket-triage-py__skills+snippet__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 18585,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-sage"
+      ],
+      "skill_reads": [],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Skill": 1,
+        "Read": 2,
+        "Glob": 2,
+        "Edit": 2
+      },
+      "cost_usd": 0.064993,
+      "duration_ms": 17796,
+      "num_turns": 9,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "`POST /tickets` in `app.py` now sets each new ticket's `queue` to `refund`, `bug` or `other`. I haven't run it or tested it against the live API.\n\n- **How it decides:** a new `triage()` function calls Levanto Sage (`POST /decide`) as a choice question. Each of the three queues has a one-line description. The ticket's subject and body are sent as the content.\n- **Key:** it reads `LEVANTO_API_KEY` from the environment and never logs it. If the variable isn't set, `triage()` raises a `KeyError`, so set it before starting the app.\n- **When Sage returns `null`:** the ticket goes to `other`.\n- **When the call fails:** a timeout, an HTTP error or an unexpected response also puts the ticket in `other`, so ticket creation never fails because of triage.\n\nSending unsure tickets to `other` means a refund request Sage can't classify gets no special flag. If you'd rather have a separate `review` queue for those, it's a small change.\n\nI didn't need to touch `requirements.txt`, since `httpx` was already listed.",
+      "snippet_installed": true,
+      "changed_files": [
+        {
+          "path": "app.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 1936,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /decide",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "app.py"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "app.py"
+          ]
+        },
+        {
+          "id": "kind",
+          "desc": "kind is choice",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "app.py"
+          ]
+        },
+        {
+          "id": "options",
+          "desc": "refund, bug and other options",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "app.py"
+          ]
+        },
+        {
+          "id": "null",
+          "desc": "explicit None branch (strict; graded null_safe is the semantic check)",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "app.py"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "app.py"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 8,
+      "checks_total": 8,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "null_safe",
+          "text": "When the decision comes back null/unsure, the ticket goes to a safe place (manual review, 'other' or unrouted) and the code does not crash or treat it as refund or bug.",
+          "pass": true,
+          "reason": "A null `chosen` fails the `in QUEUES` check and returns \"other\", so it is never treated as refund or bug. The one gap is that a null `result` object would raise an uncaught TypeError.",
+          "graded": true
+        },
+        {
+          "id": "failure_safe",
+          "text": "The HTTP call has a timeout, and if the triage call fails the ticket is still created (it is not lost and the endpoint does not return a 500 because of triage).",
+          "pass": true,
+          "reason": "The call has `timeout=15`. HTTP errors, KeyError and ValueError are caught and return \"other\", so the ticket is still created, though a TypeError from a malformed response body would not be caught.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0177014,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 2,
+      "judged_total": 2
+    },
+    {
+      "id": "ticket-triage-py__none__r1",
+      "task": "ticket-triage-py",
+      "config": "none",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/ticket-triage-py__none__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 20349,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5",
+        "claude-haiku-5-5"
+      ],
+      "init_skills": [
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [],
+      "skill_reads": [],
+      "levanto_skills_loaded": [],
+      "web_fetches": [],
+      "web_searches": [
+        "Levanto API documentation chat completions"
+      ],
+      "tool_counts": {
+        "Read": 3,
+        "Glob": 1,
+        "WebSearch": 1,
+        "Edit": 1
+      },
+      "cost_usd": 0.0595409,
+      "duration_ms": 19390,
+      "num_turns": 7,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "`POST /tickets` in `app.py` now sets `queue` to `\"refund\"`, `\"bug\"` or `\"other\"` on each new ticket. I haven't run it or tested it.\n\nIt does **not** use Levanto. I couldn't find any Levanto API docs. The repo only has an empty `LEVANTO_API_KEY` in `.env.example`, and a web search returned nothing for it. I didn't want to guess at an endpoint or request format.\n\nInstead, a new `triage(subject, body)` function does keyword matching on the subject and body:\n- **`refund`:** the text contains \"refund\", \"money back\", \"chargeback\", \"charged twice\" or \"reimburse\".\n- **`bug`:** the text contains \"bug\", \"error\", \"crash\", \"exception\", \"broken\", \"not working\", \"doesn't work\" or \"fails\".\n- **`other`:** anything else.\n\nRefund is checked first, so a ticket that matches both goes to `refund`. The keyword lists are my own guesses, so adjust them to your tickets.\n\nIf you want Levanto to do the classification, send me its docs link or an example request, and I'll replace the body of `triage()`. I'd keep the keyword matching as a fallback for when the call fails.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "app.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 968,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /decide",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "kind",
+          "desc": "kind is choice",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "options",
+          "desc": "refund, bug and other options",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "app.py"
+          ]
+        },
+        {
+          "id": "null",
+          "desc": "explicit None branch (strict; graded null_safe is the semantic check)",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": false,
+        "used_llm": false,
+        "used_levanto": false
+      },
+      "checks_passed": 3,
+      "checks_total": 8,
+      "chose_sage": false,
+      "avoided_sage": null,
+      "right_skill": false,
+      "skill_triggered": false,
+      "judged": [
+        {
+          "id": "null_safe",
+          "text": "When the decision comes back null/unsure, the ticket goes to a safe place (manual review, 'other' or unrouted) and the code does not crash or treat it as refund or bug.",
+          "pass": false,
+          "reason": "The code never calls Levanto, so there is no null/unsure decision to handle; it only uses a local keyword matcher that defaults to 'other'.",
+          "graded": true
+        },
+        {
+          "id": "failure_safe",
+          "text": "The HTTP call has a timeout, and if the triage call fails the ticket is still created (it is not lost and the endpoint does not return a 500 because of triage).",
+          "pass": false,
+          "reason": "There is no HTTP call, so no timeout or failure handling exists; triage is not wrapped in try/except.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0082227,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 0,
+      "judged_total": 2
+    },
+    {
+      "id": "forum-moderation-ts__skills+snippet__r1",
+      "task": "forum-moderation-ts",
+      "config": "skills+snippet",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/forum-moderation-ts__skills+snippet__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 15146,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-sage"
+      ],
+      "skill_reads": [],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Skill": 1,
+        "Glob": 1,
+        "Read": 4,
+        "Write": 1,
+        "Edit": 1
+      },
+      "cost_usd": 0.0748219,
+      "duration_ms": 14415,
+      "num_turns": 10,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "New forum posts now go through a moderation check before they're published. A post that looks like harassment or spam gets `status: \"held\"`. I haven't compiled it or run it against the API, so it's untested.\n\n- **`src/moderation.ts` (new):** `moderationHook` is a before-publish hook. It sends the post body to Levanto Sage (`POST /decide`) as a tags question with `harassment` and `spam` tags. Each tag's name says what doesn't count, such as blunt criticism or one genuine recommendation.\n- **`src/index.ts`:** registers the hook at startup with `registerBeforePublish(moderationHook)`.\n\nA post is held if either tag applies. It is also held if Sage returns `null` for a tag, meaning it isn't sure. If the API call fails or times out (15 s), the post is held and the error message is logged, so nothing goes out unchecked. The catch is that an API outage holds every new post until someone reviews it.\n\nThe key comes from `LEVANTO_API_KEY`, which is already listed in `.env.example`. Nothing in the project loads `.env`, so export the variable or load it yourself.\n\nThere's no review queue yet. Held posts are only stored with `status: \"held\"`, and nothing lists or approves them.",
+      "snippet_installed": true,
+      "changed_files": [
+        {
+          "path": "src/index.ts",
+          "status": "M"
+        },
+        {
+          "path": "src/moderation.ts",
+          "status": "A"
+        }
+      ],
+      "diff_chars": 2534,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /decide",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/moderation.ts"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/moderation.ts"
+          ]
+        },
+        {
+          "id": "kind",
+          "desc": "kind is yesno, tags or choice",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/moderation.ts"
+          ]
+        },
+        {
+          "id": "hook",
+          "desc": "registers a beforePublish hook",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/index.ts"
+          ]
+        },
+        {
+          "id": "null",
+          "desc": "explicit null branch (strict; graded null_safe is the semantic check)",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from process.env",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/moderation.ts"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 7,
+      "checks_total": 8,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "null_safe",
+          "text": "A null/unsure answer (yesno answer null, or tag applies null) results in the post being held for review, not published as if it were clean.",
+          "pass": true,
+          "reason": "The hold condition is `applies !== false`, so null (unsure) tags hold the post, and errors also fail closed to held.",
+          "graded": true
+        },
+        {
+          "id": "both_covered",
+          "text": "Both harassment and spam are checked, each with a clear definition in the question instructions or tag names.",
+          "pass": true,
+          "reason": "Harassment and spam are separate tags, and each name includes a clear definition with exclusions.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0102647,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 2,
+      "judged_total": 2
+    },
+    {
+      "id": "forum-moderation-ts__none__r1",
+      "task": "forum-moderation-ts",
+      "config": "none",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/forum-moderation-ts__none__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 22023,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [],
+      "skill_reads": [],
+      "levanto_skills_loaded": [],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Glob": 1,
+        "Bash": 1,
+        "Read": 4,
+        "Write": 1,
+        "Edit": 1
+      },
+      "cost_usd": 0.0637116,
+      "duration_ms": 21346,
+      "num_turns": 9,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I added a moderation hook that holds harassment and spam posts for review instead of publishing them. I haven't compiled or run it, because Bash is disabled in this session. Please run `npm run build` and `node dist/index.js` to check it.\n\n- **`src/moderation.ts` (new):** `createModerationHook()` returns a before-publish hook that sets `status: \"held\"` on any post the classifier flags.\n  - **Default classifier:** it's rule-based. It flags harassment (self-harm taunts, direct insults, threats, doxxing) and spam (scam and promo phrases, more than 3 links, long runs of one character).\n  - **Fail-closed:** if the classifier throws, the post is held rather than published unchecked.\n  - **Options:** you can pass your own `classifier` and an `onHeld` callback.\n- **`src/index.ts`:** registers the hook at startup through the existing `registerBeforePublish`. It logs the post id and reason whenever a post is held.\n\n- **Accuracy:** the regex rules are crude and will miss things and sometimes flag harmless posts. I didn't send post content to an outside service, and I didn't know what `LEVANTO_API_KEY` in `.env.example` is for. If you want a model or API-backed check, pass it as the `classifier` option and nothing else needs to change.\n- **Review queue:** held posts are stored with `status: \"held\"`, but there's no review queue or approve/reject function yet. I can add one.\n- **Reasons not saved:** the hold reason isn't stored on the post, only passed to `onHeld`.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "src/index.ts",
+          "status": "M"
+        },
+        {
+          "path": "src/moderation.ts",
+          "status": "A"
+        }
+      ],
+      "diff_chars": 3399,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /decide",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "kind",
+          "desc": "kind is yesno, tags or choice",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "hook",
+          "desc": "registers a beforePublish hook",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/index.ts"
+          ]
+        },
+        {
+          "id": "null",
+          "desc": "explicit null branch (strict; graded null_safe is the semantic check)",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from process.env",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": false,
+        "used_llm": false,
+        "used_levanto": false
+      },
+      "checks_passed": 3,
+      "checks_total": 8,
+      "chose_sage": false,
+      "avoided_sage": null,
+      "right_skill": false,
+      "skill_triggered": false,
+      "judged": [
+        {
+          "id": "null_safe",
+          "text": "A null/unsure answer (yesno answer null, or tag applies null) results in the post being held for review, not published as if it were clean.",
+          "pass": false,
+          "reason": "The code uses regex rules with no Levanto null/unsure answer; it only holds on a match or a thrown error, and an unsure result is not handled as hold.",
+          "graded": true
+        },
+        {
+          "id": "both_covered",
+          "text": "Both harassment and spam are checked, each with a clear definition in the question instructions or tag names.",
+          "pass": false,
+          "reason": "Harassment and spam are both checked through regex patterns, but there are no clear definitions in question instructions or tag names, so the expectation of defined Levanto-style checks is not met.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0131507,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 0,
+      "judged_total": 2
+    },
+    {
+      "id": "forum-moderation-ts__skills__r1",
+      "task": "forum-moderation-ts",
+      "config": "skills",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/forum-moderation-ts__skills__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 20533,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-sage"
+      ],
+      "skill_reads": [
+        "levanto-sage/references/decision-kinds.md"
+      ],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Glob": 1,
+        "Skill": 1,
+        "Read": 5,
+        "Write": 1,
+        "Edit": 1
+      },
+      "cost_usd": 0.0867805,
+      "duration_ms": 19936,
+      "num_turns": 11,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I added a before-publish moderation hook that holds harassment and spam posts for review. I haven't run it or type-checked it. The project has no `tsconfig.json`, I didn't install dependencies, and there's no `LEVANTO_API_KEY` set here.\n\nThe new file is `src/moderation.ts`. It sends each post body to Levanto Sage (`POST /decide`) with two tags, `harassment` and `spam`. The tag descriptions say that heated disagreement isn't harassment and that a single on-topic mention isn't spam. Any tag that comes back `true` sets the post's status to `\"held\"`, and it logs the post id and reason. The hook is registered in `src/index.ts` with `registerBeforePublish(moderationHook)`.\n\nThe hook also holds a post when Sage returns `null` for a tag, meaning it isn't sure. It does the same if the Sage call fails or times out after 15 seconds. I chose that so nothing unchecked gets published, but a Sage outage will hold every new post. If you'd rather publish when Sage is down, change the `catch` branch in `moderationHook` to return `post`.\n\nYou'll need to put your key in `.env` as `LEVANTO_API_KEY`, as `.env.example` already shows. The code doesn't load `.env` itself, so use `node --env-file=.env` or whatever you normally use.\n\nThere's no review queue yet. Held posts are only stored with `status: \"held\"`. The hook checks the post body on its own, without author or thread context.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "src/index.ts",
+          "status": "M"
+        },
+        {
+          "path": "src/moderation.ts",
+          "status": "A"
+        }
+      ],
+      "diff_chars": 2671,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /decide",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/moderation.ts"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/moderation.ts"
+          ]
+        },
+        {
+          "id": "kind",
+          "desc": "kind is yesno, tags or choice",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/moderation.ts"
+          ]
+        },
+        {
+          "id": "hook",
+          "desc": "registers a beforePublish hook",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/index.ts"
+          ]
+        },
+        {
+          "id": "null",
+          "desc": "explicit null branch (strict; graded null_safe is the semantic check)",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/moderation.ts"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from process.env",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/moderation.ts"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 8,
+      "checks_total": 8,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "null_safe",
+          "text": "A null/unsure answer (yesno answer null, or tag applies null) results in the post being held for review, not published as if it were clean.",
+          "pass": true,
+          "reason": "The filter keeps tags where applies !== false, so null (unsure) results are held; errors are also held.",
+          "graded": true
+        },
+        {
+          "id": "both_covered",
+          "text": "Both harassment and spam are checked, each with a clear definition in the question instructions or tag names.",
+          "pass": true,
+          "reason": "Harassment and spam are both tagged with clear definitions and exclusions in the tag names.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0105027,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 2,
+      "judged_total": 2
+    },
+    {
+      "id": "contract-review-py__skills+snippet__r1",
+      "task": "contract-review-py",
+      "config": "skills+snippet",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/contract-review-py__skills+snippet__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 13275,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-sage"
+      ],
+      "skill_reads": [],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Read": 1,
+        "Skill": 1,
+        "Edit": 2
+      },
+      "cost_usd": 0.057581900000000005,
+      "duration_ms": 12398,
+      "num_turns": 6,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "`process()` in `contracts.py` now asks Levanto Sage whether each contract needs legal review. I haven't run it or called the API, so it's untested.\n\n- **Yes:** the contract goes to `send_to_legal`.\n- **No:** the contract is approved.\n- **Sage isn't sure:** the contract goes to legal with the reason \"unsure whether legal review is needed\". It is never auto-approved.\n\nThe prompt asks for legal review on non-standard or high-risk terms. Examples are uncapped liability, hard-to-exit auto-renewal, unusual IP assignment, exclusivity, and odd termination or jurisdiction terms. The rule is in `LEGAL_REVIEW_RULE`, so you can edit it to match your real policy.\n\n- **API key:** the code reads `LEVANTO_API_KEY` from the environment.\n- **`httpx`:** this is a new dependency. I didn't check whether it's installed or listed in a requirements file.\n- **Error handling:** an HTTP error from Sage raises an exception out of `process()`. I didn't add a fallback, so the caller has to handle it.",
+      "snippet_installed": true,
+      "changed_files": [
+        {
+          "path": "contracts.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 2148,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /decide",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "contracts.py"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "contracts.py"
+          ]
+        },
+        {
+          "id": "kind",
+          "desc": "kind is yesno, choice or tags",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "contracts.py"
+          ]
+        },
+        {
+          "id": "routes_legal",
+          "desc": "process() can call send_to_legal",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "contracts.py"
+          ]
+        },
+        {
+          "id": "null",
+          "desc": "explicit None branch (strict; graded null_safe is the semantic check)",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "contracts.py"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "contracts.py"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 8,
+      "checks_total": 8,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "null_safe",
+          "text": "When the decision is null/unsure (or the call fails), the contract is sent to legal rather than approved.",
+          "pass": false,
+          "reason": "A null answer is sent to legal, but a failed call isn't. raise_for_status() and the network call have no try/except, so an error propagates out of process() and the contract goes nowhere. It isn't approved, but it isn't sent to legal either.",
+          "graded": true
+        },
+        {
+          "id": "criteria",
+          "text": "The judgment is made by a model/API on the contract text with concrete criteria (e.g. liability, auto-renewal, governing law), not only by a hand-written keyword list.",
+          "pass": true,
+          "reason": "The decision comes from the Levanto /decide API on the contract text. The instructions list concrete criteria: liability/indemnity, auto-renewal, IP assignment, exclusivity, termination and governing law.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0143947,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 1,
+      "judged_total": 2
+    },
+    {
+      "id": "contract-review-py__none__r1",
+      "task": "contract-review-py",
+      "config": "none",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/contract-review-py__none__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 17814,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [],
+      "skill_reads": [],
+      "levanto_skills_loaded": [],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Glob": 1,
+        "Read": 2,
+        "Grep": 1,
+        "Edit": 2,
+        "Bash": 1
+      },
+      "cost_usd": 0.04810110000000001,
+      "duration_ms": 17249,
+      "num_turns": 8,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I couldn't run the code because Bash is disabled in this session, so none of it has been tested.\n\n`process()` in `contracts.py` now sends a contract to legal if it matches any of these rules and approves it otherwise. I added `review_reasons()` and a `LEGAL_REVIEW_RULES` list to hold the rules. The reasons are joined into the `send_to_legal` message.\n\n- **Unlimited liability:** the text says liability is unlimited.\n- **Auto-renewal:** the text says the contract renews automatically.\n- **Non-standard governing law:** the governing-law clause names anything other than England, Delaware or New York.\n\nYou didn't say what \"needs legal review\" means, so I made up these rules. I based them on `sample_contract.txt`, which has all three issues. The governing-law allowlist is the part I'm least sure of. Please replace these rules with your real criteria.\n\nGoing by the regexes, `sample_contract.txt` should go to legal with all three reasons, and a contract with a capped liability, a fixed term and England governing law should be approved. I haven't confirmed either.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "contracts.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 1242,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /decide",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "kind",
+          "desc": "kind is yesno, choice or tags",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "routes_legal",
+          "desc": "process() can call send_to_legal",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "contracts.py"
+          ]
+        },
+        {
+          "id": "null",
+          "desc": "explicit None branch (strict; graded null_safe is the semantic check)",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": false,
+        "used_llm": false,
+        "used_levanto": false
+      },
+      "checks_passed": 3,
+      "checks_total": 8,
+      "chose_sage": false,
+      "avoided_sage": null,
+      "right_skill": false,
+      "skill_triggered": false,
+      "judged": [
+        {
+          "id": "null_safe",
+          "text": "When the decision is null/unsure (or the call fails), the contract is sent to legal rather than approved.",
+          "pass": false,
+          "reason": "No model/API call exists; the regex approach has no null/unsure handling, and contracts that match no rule are approved.",
+          "graded": true
+        },
+        {
+          "id": "criteria",
+          "text": "The judgment is made by a model/API on the contract text with concrete criteria (e.g. liability, auto-renewal, governing law), not only by a hand-written keyword list.",
+          "pass": false,
+          "reason": "The judgment uses only hand-written regex keyword rules, with no model or API evaluating the contract text.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0083967,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 0,
+      "judged_total": 2
+    },
+    {
+      "id": "contract-review-py__skills__r1",
+      "task": "contract-review-py",
+      "config": "skills",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/contract-review-py__skills__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 15843,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-sage"
+      ],
+      "skill_reads": [],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Grep": 1,
+        "Read": 1,
+        "Skill": 1,
+        "Edit": 2
+      },
+      "cost_usd": 0.060428899999999994,
+      "duration_ms": 15062,
+      "num_turns": 7,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "`process()` in `contracts.py` now asks Levanto Sage a yes/no question about the contract text. A \"yes\" goes to `send_to_legal`, and a \"no\" goes to `approve`. I haven't run it or tested it.\n\n- **Unsure cases:** If Sage returns `null` (it isn't sure), the contract goes to legal with the reason \"unclear if review is needed\". I chose that because approving an unclear contract seemed riskier than a needless review.\n- **Review criteria:** The yes/no question lists what counts as risky. These are uncapped liability, unusual indemnities, automatic renewal, exclusivity, IP assignment and nonstandard governing law. I wrote that list myself, so please edit the `instructions` string in `needs_legal_review` to match your real policy.\n- **Setup:** The code needs `LEVANTO_API_KEY` set in the environment. It also needs `httpx` installed, and I didn't add it to any requirements file.\n- **API errors:** The HTTP call raises on an API error, so `process()` will raise if Sage is down or the plan's usage is used up. Say so if you'd rather it send those contracts to legal instead.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "contracts.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 2070,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /decide",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "contracts.py"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "contracts.py"
+          ]
+        },
+        {
+          "id": "kind",
+          "desc": "kind is yesno, choice or tags",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "contracts.py"
+          ]
+        },
+        {
+          "id": "routes_legal",
+          "desc": "process() can call send_to_legal",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "contracts.py"
+          ]
+        },
+        {
+          "id": "null",
+          "desc": "explicit None branch (strict; graded null_safe is the semantic check)",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "contracts.py"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "contracts.py"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 8,
+      "checks_total": 8,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "null_safe",
+          "text": "When the decision is null/unsure (or the call fails), the contract is sent to legal rather than approved.",
+          "pass": false,
+          "reason": "A null answer goes to legal, but if the call fails (raise_for_status, timeout, missing key) the exception propagates and the contract is neither sent to legal nor approved, so failures aren't explicitly routed to legal.",
+          "graded": true
+        },
+        {
+          "id": "criteria",
+          "text": "The judgment is made by a model/API on the contract text with concrete criteria (e.g. liability, auto-renewal, governing law), not only by a hand-written keyword list.",
+          "pass": true,
+          "reason": "The decision is made by the Levanto /decide API on the contract text with concrete criteria (uncapped liability, auto-renewal, exclusivity, IP assignment, governing law).",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0099507,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 1,
+      "judged_total": 2
+    },
+    {
+      "id": "invoice-extract-py__skills+snippet__r1",
+      "task": "invoice-extract-py",
+      "config": "skills+snippet",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/invoice-extract-py__skills+snippet__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 9803,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-sage"
+      ],
+      "skill_reads": [],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Skill": 1,
+        "Glob": 1,
+        "Read": 1,
+        "Write": 1
+      },
+      "cost_usd": 0.0522711,
+      "duration_ms": 9023,
+      "num_turns": 6,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I implemented `parse_invoice` in `invoices.py`, but I haven't run it. I didn't call the API or write tests.\n\nIt sends the invoice text to Levanto's `POST /v1/extract`. It returns a dict with these keys:\n- `vendor`\n- `invoice_number`\n- `total`, as `{\"amount\": float, \"currency\": str}`\n- `due_date`, as an ISO date string\n\nAny value the invoice doesn't state, or that Sage isn't sure about, comes back as `None`. Callers should send those invoices to manual review rather than treat them as valid.\n\n- **API key:** the function reads `LEVANTO_API_KEY` from the environment and never logs it. It raises `KeyError` if the variable is missing.\n- **HTTP errors:** it calls `raise_for_status()` with a 15-second timeout, so a failed request raises an `httpx` error. It doesn't retry on 429 or 503.\n- **Dependency:** it needs `httpx` installed. I didn't check whether the project already lists it.",
+      "snippet_installed": true,
+      "changed_files": [
+        {
+          "path": "invoices.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 1307,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /v1/extract",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "invoices.py"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "invoices.py"
+          ]
+        },
+        {
+          "id": "money",
+          "desc": "total uses type money",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "invoices.py"
+          ]
+        },
+        {
+          "id": "date",
+          "desc": "due date uses type date",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "invoices.py"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "invoices.py"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 7,
+      "checks_total": 7,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "fields",
+          "text": "parse_invoice returns all four fields (vendor, invoice number, total, due date) read from the API response's `values`.",
+          "pass": true,
+          "reason": "parse_invoice calls /v1/extract and returns vendor, invoice_number, total and due_date read from the response's `values`.",
+          "graded": true
+        },
+        {
+          "id": "null_safe",
+          "text": "Missing or unsure fields come back as None (or are flagged) rather than being invented, defaulted to a fake value, or crashing the function.",
+          "pass": true,
+          "reason": "It uses values.get(key), so missing or null fields come back as None with no invented defaults, and the docstring says to route such invoices to manual review. A missing `values` key or an HTTP error would still raise, but field-level missing or unsure data is handled.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.009044700000000001,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 2,
+      "judged_total": 2
+    },
+    {
+      "id": "invoice-extract-py__skills__r1",
+      "task": "invoice-extract-py",
+      "config": "skills",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/invoice-extract-py__skills__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 13366,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-sage"
+      ],
+      "skill_reads": [
+        "levanto-sage/references/extract.md"
+      ],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Skill": 1,
+        "Glob": 1,
+        "Read": 4,
+        "Write": 1
+      },
+      "cost_usd": 0.0676981,
+      "duration_ms": 12644,
+      "num_turns": 9,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I implemented `parse_invoice` in `invoices.py`, but I haven't run it. It makes a live API call, and I didn't try it against `sample_invoice.txt`.\n\nIt sends the text to Levanto Sage's `/v1/extract` endpoint. It returns a dict with these keys:\n- `vendor`\n- `invoice_number`\n- `total`, as `{\"amount\": float, \"currency\": str}`\n- `due_date`, as `YYYY-MM-DD`\n\nAny field can come back as `None`. That means the text doesn't state it or Sage isn't sure, so route those invoices to manual review rather than treating them as empty.\n\nThe function reads `LEVANTO_API_KEY` from the environment and raises a clear error if it's missing. Add your key to `.env` (the template is `.env.example`) and export it before calling. `LEVANTO_BASE_URL` can override the default API URL.\n\nIt uses `httpx`, which the project doesn't list anywhere, so you may need to `pip install httpx`. HTTP errors, such as a 402 or 429, are raised as exceptions and not retried.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "invoices.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 1565,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /v1/extract",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "invoices.py"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "invoices.py"
+          ]
+        },
+        {
+          "id": "money",
+          "desc": "total uses type money",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "invoices.py"
+          ]
+        },
+        {
+          "id": "date",
+          "desc": "due date uses type date",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "invoices.py"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "invoices.py"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 7,
+      "checks_total": 7,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "fields",
+          "text": "parse_invoice returns all four fields (vendor, invoice number, total, due date) read from the API response's `values`.",
+          "pass": true,
+          "reason": "It calls /v1/extract and returns vendor, invoice_number, total and due_date, all read from the response's `values`.",
+          "graded": true
+        },
+        {
+          "id": "null_safe",
+          "text": "Missing or unsure fields come back as None (or are flagged) rather than being invented, defaulted to a fake value, or crashing the function.",
+          "pass": true,
+          "reason": "It uses values.get(key), so missing or unsure fields come back as None, and it doesn't invent defaults; the only crash risk is a response with no `values` key, which is minor.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0091167,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 2,
+      "judged_total": 2
+    },
+    {
+      "id": "order-extract-ts__skills__r1",
+      "task": "order-extract-ts",
+      "config": "skills",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/order-extract-ts__skills__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 16063,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [],
+      "skill_reads": [
+        "levanto-sage/SKILL.md",
+        "levanto-sage/references/extract.md"
+      ],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Read": 5,
+        "Glob": 1,
+        "Write": 1
+      },
+      "cost_usd": 0.07467059999999999,
+      "duration_ms": 15458,
+      "num_turns": 8,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I implemented `parseOrder` in `src/orders.ts`, but I haven't run or type-checked it, and I haven't called the API.\n\nIt sends the message to Levanto Sage's `POST /v1/extract` endpoint and asks for three fields:\n- **`customer`:** the customer's name.\n- **`items`:** a list with one entry per item ordered.\n- **`pickup_time`:** a `time` field, which Sage returns as `HH:MM`.\n\nHow it handles the edge cases:\n- **Missing values:** Sage returns `null` when the message doesn't state a field or it isn't sure. That becomes `customer: null` and `pickupTime: null`, and `items` becomes `[]`.\n- **Time format:** if Sage adds a timezone offset to the time, the code keeps only the `HH:MM` part.\n- **Errors:** a missing `LEVANTO_API_KEY` throws an error that says so. A non-2xx response throws with the status and body. There's a 15-second timeout, and there are no retries.\n\nThe function reads the key from `LEVANTO_API_KEY`. `.env.example` already has the variable, but you'll need a real key in your environment. The code doesn't load `.env` itself. If you want that, run Node with `--env-file=.env`.\n\nI haven't checked how Sage words the `items` entries, for example whether \"two oat lattes\" comes back as one entry or two. Try a few real messages, including ones with no name or no time, before relying on it.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "src/orders.ts",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 1696,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /v1/extract",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/orders.ts"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/orders.ts"
+          ]
+        },
+        {
+          "id": "time",
+          "desc": "pickup time uses type time",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/orders.ts"
+          ]
+        },
+        {
+          "id": "list_field",
+          "desc": "items is a one-item list field",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/orders.ts"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from process.env",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/orders.ts"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 7,
+      "checks_total": 7,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "maps_order",
+          "text": "The function returns an Order with customer, items and pickupTime mapped from the API response, keeping null for customer/pickupTime when absent and an empty array when no items.",
+          "pass": true,
+          "reason": "Returns Order with customer ?? null, items ?? [], and pickupTime normalized to HH:MM or null, mapped from the extract response values.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0085407,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 1,
+      "judged_total": 1
+    },
+    {
+      "id": "invoice-extract-py__none__r1",
+      "task": "invoice-extract-py",
+      "config": "none",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/invoice-extract-py__none__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 32758,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5",
+        "claude-haiku-5-5"
+      ],
+      "init_skills": [
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [],
+      "skill_reads": [],
+      "levanto_skills_loaded": [],
+      "web_fetches": [],
+      "web_searches": [
+        "Levanto API invoice extraction Python SDK"
+      ],
+      "tool_counts": {
+        "Glob": 1,
+        "Grep": 1,
+        "Read": 3,
+        "WebSearch": 1,
+        "Write": 1,
+        "Edit": 1,
+        "Bash": 1
+      },
+      "cost_usd": 0.08595130000000001,
+      "duration_ms": 32188,
+      "num_turns": 10,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I implemented `parse_invoice` in `invoices.py`, but I couldn't run it. Bash is disabled in this session, so it's untested.\n\nI also found no Levanto docs. A web search returned nothing for it, and the repo only has an empty `LEVANTO_API_KEY` in `.env.example`. Because the input is plain OCR text, I wrote a local regex parser instead. It makes no API calls and doesn't use the key. If you want it to go through Levanto, send me the docs or SDK name and I'll switch it.\n\n**What it returns**\n- `vendor`: the first line that isn't the \"INVOICE…\" header or a \"Bill to\" line, cut at the first comma.\n- `invoice_number`: the token after \"Invoice No.\", \"Invoice #\" and similar.\n- `total` and `currency`: the last \"Total\" or \"Total due\" line, with `total` as a `Decimal`. It handles `1,234.56` and `1.234,56`.\n- `due_date`: a `datetime.date`, taken from the first \"due\" or \"due by\" phrase that parses as a date.\n\nAny field it can't find comes back as `None`. I added `currency` to the dict because the total is ambiguous without it.\n\nReading `sample_invoice.txt` by hand, I expect `Nordlicht GmbH`, `2026-117`, `Decimal(\"540.00\")`, `EUR` and `date(2026, 11, 21)`. Running `parse_invoice` on that file would confirm it.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "invoices.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 3180,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /v1/extract",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "money",
+          "desc": "total uses type money",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "date",
+          "desc": "due date uses type date",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": false,
+        "used_llm": false,
+        "used_levanto": false
+      },
+      "checks_passed": 2,
+      "checks_total": 7,
+      "chose_sage": false,
+      "avoided_sage": null,
+      "right_skill": false,
+      "skill_triggered": false,
+      "judged": [
+        {
+          "id": "fields",
+          "text": "parse_invoice returns all four fields (vendor, invoice number, total, due date) read from the API response's `values`.",
+          "pass": false,
+          "reason": "The code parses the text locally with regexes and never calls the Levanto API, so no fields are read from a response's `values`.",
+          "graded": true
+        },
+        {
+          "id": "null_safe",
+          "text": "Missing or unsure fields come back as None (or are flagged) rather than being invented, defaulted to a fake value, or crashing the function.",
+          "pass": false,
+          "reason": "Missing fields do come back as None, but `_parse_amount` can raise ValueError on an unparseable amount, and the vendor falls back to the first non-header line, which can be invented. There is also no API-based unsure handling.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0126847,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 0,
+      "judged_total": 2
+    },
+    {
+      "id": "order-extract-ts__skills+snippet__r1",
+      "task": "order-extract-ts",
+      "config": "skills+snippet",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/order-extract-ts__skills+snippet__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 14661,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-sage"
+      ],
+      "skill_reads": [
+        "levanto-sage/references/extract.md"
+      ],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Read": 2,
+        "Skill": 1,
+        "Write": 1
+      },
+      "cost_usd": 0.06173329999999999,
+      "duration_ms": 13787,
+      "num_turns": 6,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I implemented `parseOrder` in `src/orders.ts`. I haven't run it, because I didn't call the API or write any tests.\n\nIt sends the message to Levanto's `POST /v1/extract` endpoint. It asks for three fields:\n- **`customer`:** the customer's name.\n- **`items`:** a list of the items ordered, with quantities when the message gives them.\n- **`pickupTime`:** the pickup time, typed as a time.\n\n**Missing values:**\n- A name or time that is missing or uncertain comes back as `null`.\n- Missing items come back as `[]`.\n- The pickup time is trimmed to `HH:MM`, because the API can add a timezone offset.\n\n**Setup and errors:**\n- The key is read from `LEVANTO_API_KEY`, and the function throws if it isn't set.\n- It also throws on a non-OK response, and the request times out after 15 seconds.\n\nTo check it, run it on your example message (\"two oat lattes and a croissant for pickup at 8:15, name's Dana\"). Also try a message with no name or no time, to confirm those fields come back as `null`.",
+      "snippet_installed": true,
+      "changed_files": [
+        {
+          "path": "src/orders.ts",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 1758,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /v1/extract",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/orders.ts"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/orders.ts"
+          ]
+        },
+        {
+          "id": "time",
+          "desc": "pickup time uses type time",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/orders.ts"
+          ]
+        },
+        {
+          "id": "list_field",
+          "desc": "items is a one-item list field",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/orders.ts"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from process.env",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/orders.ts"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 7,
+      "checks_total": 7,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "maps_order",
+          "text": "The function returns an Order with customer, items and pickupTime mapped from the API response, keeping null for customer/pickupTime when absent and an empty array when no items.",
+          "pass": true,
+          "reason": "parseOrder returns an Order with customer ?? null, items ?? [] and pickupTime normalized to \"HH:MM\" or null, so it keeps null for absent customer/pickupTime and an empty array for no items. I couldn't check the `values` response shape against the API docs, so I assumed the agent's shape is right.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0135207,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 1,
+      "judged_total": 1
+    },
+    {
+      "id": "call-escalation-stream-py__none__r1",
+      "task": "call-escalation-stream-py",
+      "config": "none",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/call-escalation-stream-py__none__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 13611,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [],
+      "skill_reads": [],
+      "levanto_skills_loaded": [],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Glob": 1,
+        "Read": 1,
+        "Edit": 1
+      },
+      "cost_usd": 0.0371473,
+      "duration_ms": 12838,
+      "num_turns": 4,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "`on_transcript_line` in `call_monitor.py` now calls `notify_supervisor` when a caller asks for a human. It does this on the finalized line itself, so the supervisor hears while the call is still live. I haven't run it or tested it.\n\n- **Trigger:** it only looks at lines where `speaker == \"caller\"`. A regex matches phrasings like \"talk to a human\", \"speak with a real person\", \"get me an agent\", \"representative please\" and \"a live agent\".\n- **Once per call:** the supervisor is notified once per call, so repeated requests don't spam them. `on_call_started` and `on_call_ended` clear that state, so it doesn't leak between calls.\n- **Notification text:** the reason is `caller asked for a human: '<the line>'`.\n\nI assumed the speech-to-text service labels the customer as `\"caller\"`. The file doesn't say what speaker values it sends, so please check that. If it uses something else, such as `\"customer\"` or `\"user\"`, change the `speaker != \"caller\"` check.\n\nThe regex is a keyword heuristic. It will miss unusual wording and could occasionally match something unintended. You can extend or tighten the pattern as you see real transcripts.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "call_monitor.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 1425,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "opens the /v1/stream WebSocket",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "start_frame",
+          "desc": "sends a start frame",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "append_frame",
+          "desc": "sends append frames",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "kind",
+          "desc": "kind is yesno",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_per_line_decide",
+          "desc": "does not call /decide per line",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": false,
+        "used_llm": false,
+        "used_levanto": false
+      },
+      "checks_passed": 3,
+      "checks_total": 9,
+      "chose_sage": false,
+      "avoided_sage": null,
+      "right_skill": false,
+      "skill_triggered": false,
+      "judged": [
+        {
+          "id": "one_socket",
+          "text": "One WebSocket session per call: opened when the call starts (or on first line), each transcript line sent as an append on the same socket, closed when the call ends.",
+          "pass": false,
+          "reason": "No WebSocket is opened; the code uses a local regex and never connects to the Levanto stream.",
+          "graded": true
+        },
+        {
+          "id": "notify_once",
+          "text": "The supervisor is notified when the answer becomes yes (reading the decision frame's `changed`/`answers`), at most once per call, and a null answer does not notify.",
+          "pass": false,
+          "reason": "Notification is once per call via a regex and a set, but it doesn't read any decision frame's changed/answers from Levanto.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0090647,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 0,
+      "judged_total": 2
+    },
+    {
+      "id": "order-extract-ts__none__r1",
+      "task": "order-extract-ts",
+      "config": "none",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/order-extract-ts__none__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 35483,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "run"
+      ],
+      "skill_reads": [],
+      "levanto_skills_loaded": [],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Read": 4,
+        "Glob": 1,
+        "Write": 1,
+        "Skill": 1,
+        "Bash": 1
+      },
+      "cost_usd": 0.0964013,
+      "duration_ms": 34882,
+      "num_turns": 10,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "`parseOrder` is implemented in `src/orders.ts`, but I haven't run it. Bash is disabled in this session, so I couldn't run a smoke test or typecheck. I only traced the example message by hand.\n\nI traced `\"hi! two oat lattes and a croissant for pickup at 8:15, name's Dana\"`. It should give `customer: \"Dana\"`, `pickupTime: \"08:15\"` and `items: [\"two oat lattes\", \"croissant\"]`.\n\nIt uses a rule-based parser with no external service:\n- **Customer:** It looks for phrases like \"name's X\", \"my name is X\", \"this is X\", \"I'm X\" or \"under X\". It returns `null` if none match.\n- **Pickup time:** It takes the first time that has a preposition (at, by, around), minutes, or am/pm, such as \"at 8:15\", \"5pm\" or \"17:30\". It returns `\"HH:MM\"` in 24-hour form, or `null`.\n- **Items:** It removes the greeting, filler words (\"I'd like\", \"please\", \"pickup\"), the name and the time. It then splits what's left on commas and \"and\", \"plus\" or \"&\". Quantities stay in the item text (\"two oat lattes\"), and a leading \"a\" or \"an\" is dropped.\n\nThe time heuristics are fragile. A message like \"2 lattes for 9\" depends on a hand-written word list to tell the number apart from a quantity. If you need it to handle more varied messages, an LLM-backed version would be sturdier. `.env.example` has `LEVANTO_API_KEY`, but I don't know that API and there's no SDK in `package.json`, so I didn't use it. Tell me if that's what you intended.\n\nTo check it, run `npm i && npx tsc --noEmit`, then call `parseOrder` on a few sample messages.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "src/orders.ts",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 4385,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /v1/extract",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "time",
+          "desc": "pickup time uses type time",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "list_field",
+          "desc": "items is a one-item list field",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from process.env",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": false,
+        "used_llm": false,
+        "used_levanto": false
+      },
+      "checks_passed": 2,
+      "checks_total": 7,
+      "chose_sage": false,
+      "avoided_sage": null,
+      "right_skill": false,
+      "skill_triggered": false,
+      "judged": [
+        {
+          "id": "maps_order",
+          "text": "The function returns an Order with customer, items and pickupTime mapped from the API response, keeping null for customer/pickupTime when absent and an empty array when no items.",
+          "pass": false,
+          "reason": "The code parses the message locally with regexes and never calls the API, so nothing is mapped from an API response, even though the output shape uses null and an empty array.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0148207,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 0,
+      "judged_total": 1
+    },
+    {
+      "id": "call-escalation-stream-py__skills__r1",
+      "task": "call-escalation-stream-py",
+      "config": "skills",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/call-escalation-stream-py__skills__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 19729,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-sage"
+      ],
+      "skill_reads": [
+        "levanto-sage/references/stream.md"
+      ],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Glob": 1,
+        "Read": 2,
+        "Skill": 1,
+        "Write": 1
+      },
+      "cost_usd": 0.0761443,
+      "duration_ms": 19051,
+      "num_turns": 7,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I've rewritten `call_monitor.py` so the supervisor is notified during the call, as soon as the caller asks for a human. I haven't run it or tested it against the live API.\n\n- **Session per call:** `on_call_started` opens a Levanto Sage streaming session over WebSocket. `on_transcript_line` appends each line as `speaker: text`. `on_call_ended` closes the session.\n- **Detection:** a yes/no question asks whether the caller, not the agent, has asked for a human, person, real agent or supervisor.\n- **Notification:** when the answer comes back \"yes\", it calls `notify_supervisor` once per call. An unsure answer (`null`) is not treated as yes.\n- **Reconnects:** if the socket drops or the server drains, it reconnects with backoff and resends the transcript so far.\n\nThe API key is read from `LEVANTO_API_KEY`, so that needs to be set. The code also needs the `websockets` package installed.\n\nI haven't checked how the speech-to-text service labels speakers. The question assumes lines from the agent are distinguishable from lines from the caller. If the labels are unusual, tell me what they are and I'll adjust the wording.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "call_monitor.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 4565,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "opens the /v1/stream WebSocket",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "call_monitor.py"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "call_monitor.py"
+          ]
+        },
+        {
+          "id": "start_frame",
+          "desc": "sends a start frame",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "call_monitor.py"
+          ]
+        },
+        {
+          "id": "append_frame",
+          "desc": "sends append frames",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "call_monitor.py"
+          ]
+        },
+        {
+          "id": "kind",
+          "desc": "kind is yesno",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "call_monitor.py"
+          ]
+        },
+        {
+          "id": "no_per_line_decide",
+          "desc": "does not call /decide per line",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "call_monitor.py"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 9,
+      "checks_total": 9,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "one_socket",
+          "text": "One WebSocket session per call: opened when the call starts (or on first line), each transcript line sent as an append on the same socket, closed when the call ends.",
+          "pass": true,
+          "reason": "A session task is created in on_call_started and opens one websocket. Each line is sent as an `append` on that socket, and on_call_ended sends close and closes it. It only reconnects if the socket drops.",
+          "graded": true
+        },
+        {
+          "id": "notify_once",
+          "text": "The supervisor is notified when the answer becomes yes (reading the decision frame's `changed`/`answers`), at most once per call, and a null answer does not notify.",
+          "pass": true,
+          "reason": "The code reads decision frames, checks `changed`, and reads `answers`. It notifies only when the answer is \"yes\", guards with a `notified` flag so it fires at most once, and a None answer does not notify.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.020502,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 2,
+      "judged_total": 2
+    },
+    {
+      "id": "call-escalation-stream-py__skills+snippet__r1",
+      "task": "call-escalation-stream-py",
+      "config": "skills+snippet",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/call-escalation-stream-py__skills+snippet__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 21005,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-sage"
+      ],
+      "skill_reads": [
+        "levanto-sage/references/stream.md"
+      ],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Skill": 1,
+        "Glob": 1,
+        "Read": 2,
+        "Write": 1
+      },
+      "cost_usd": 0.07464090000000001,
+      "duration_ms": 20418,
+      "num_turns": 7,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I updated `call_monitor.py` so the supervisor is notified while the call is still live. I haven't run it, and it needs the `websockets` package.\n\n- **Call start:** `on_call_started` opens a Levanto Sage stream (`wss://api.levanto.ai/v1/stream`) for the call. It asks one yes/no question: has the caller asked for a human agent?\n- **Each line:** `on_transcript_line` sends the line to the stream as `speaker: text`. Sage re-evaluates as text arrives, so the supervisor is notified within a few hundred milliseconds of the request, not after the call.\n- **Notification:** when the answer changes to `yes`, `notify_supervisor` runs, once per call. A `null` answer (Sage isn't sure) does not escalate.\n- **Call end:** `on_call_ended` closes the stream and removes the call's session.\n- **Failures:** if the stream can't open or drops, the code logs the error type, never the key, and the call carries on. In that case the call gets no escalation alerts.\n- **Key:** it comes from `LEVANTO_API_KEY`.\n\nI didn't add reconnect-and-resume if the socket closes mid-call (for example, a server `draining` close). I also didn't handle `prompt_too_long`, which Sage returns when a very long call goes past 16,384 tokens. Both are small additions if you want them.",
+      "snippet_installed": true,
+      "changed_files": [
+        {
+          "path": "call_monitor.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 3589,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "opens the /v1/stream WebSocket",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "call_monitor.py"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "call_monitor.py"
+          ]
+        },
+        {
+          "id": "start_frame",
+          "desc": "sends a start frame",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "call_monitor.py"
+          ]
+        },
+        {
+          "id": "append_frame",
+          "desc": "sends append frames",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "call_monitor.py"
+          ]
+        },
+        {
+          "id": "kind",
+          "desc": "kind is yesno",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "call_monitor.py"
+          ]
+        },
+        {
+          "id": "no_per_line_decide",
+          "desc": "does not call /decide per line",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "call_monitor.py"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 9,
+      "checks_total": 9,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "one_socket",
+          "text": "One WebSocket session per call: opened when the call starts (or on first line), each transcript line sent as an append on the same socket, closed when the call ends.",
+          "pass": true,
+          "reason": "A single websocket is opened in on_call_started, each line is sent as an append on that same socket, and it is closed in on_call_ended.",
+          "graded": true
+        },
+        {
+          "id": "notify_once",
+          "text": "The supervisor is notified when the answer becomes yes (reading the decision frame's `changed`/`answers`), at most once per call, and a null answer does not notify.",
+          "pass": true,
+          "reason": "The reader checks decision frames' changed/answers, notifies only when the answer is \"yes\", guards with a notified flag so it fires at most once, and a null answer does not notify.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0120307,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 2,
+      "judged_total": 2
+    },
+    {
+      "id": "lease-review-batch-py__none__r1",
+      "task": "lease-review-batch-py",
+      "config": "none",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/lease-review-batch-py__none__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 24868,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [],
+      "skill_reads": [],
+      "levanto_skills_loaded": [],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Glob": 1,
+        "Bash": 1,
+        "Read": 4,
+        "Write": 1
+      },
+      "cost_usd": 0.0684419,
+      "duration_ms": 24328,
+      "num_turns": 8,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I implemented `review.py`, but I haven't run it. Bash is disabled in this session, so `review.csv` doesn't exist yet. Run `python review.py` to produce it.\n\nThe script writes one row per `leases/*.txt` file. It has a `lease` column, then one column per checklist question, each answered `Yes`, `No` or `Unclear`. It uses keyword and regex rules, with one rule per question, rather than a language model. `LEVANTO_API_KEY` is empty and I don't know that API.\n\nFor `unit-4b`, tracing the rules by hand gives these answers:\n\n| Question | Answer | Why |\n|---|---|---|\n| Sublet without landlord's consent | No | Consent is required. |\n| Tenant break before year 3 | No | The break is at the 5th anniversary. |\n| Tenant responsible for structural repairs | Unclear | The lease doesn't mention repairs. |\n| Rent indexed to inflation | Yes | Rent is reviewed annually in line with CPI. |\n| Director's personal guarantee | No | None is mentioned. |\n| Asbestos or environmental surveys | No | Neither is mentioned. |\n| Deposit above six months' rent | No | The deposit is £12,000 against £24,000 for six months. |\n| Governing law outside England and Wales | No | The lease is governed by England and Wales law. |\n\nRegex rules are brittle on leases worded differently from this one, and I only had this one sample. Check the answers against the text before relying on them. If you want better coverage, I can switch to an LLM-backed version once you give me the API details.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "review.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 4087,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /decide/batch",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "requests",
+          "desc": "batch body has requests",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "kind",
+          "desc": "checklist items are yesno",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "ok_check",
+          "desc": "checks `ok` on each answer",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "null",
+          "desc": "explicit None branch (strict; graded null_safe is the semantic check)",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": false,
+        "used_llm": false,
+        "used_levanto": false
+      },
+      "checks_passed": 3,
+      "checks_total": 9,
+      "chose_sage": false,
+      "avoided_sage": null,
+      "right_skill": false,
+      "skill_triggered": false,
+      "judged": [
+        {
+          "id": "one_call",
+          "text": "All checklist questions for a lease are sent together (one batch call per lease or for all leases), not one HTTP call per question.",
+          "pass": false,
+          "reason": "The code makes no HTTP calls to Levanto at all; it uses local regex rules, so no batch call is sent.",
+          "graded": true
+        },
+        {
+          "id": "null_csv",
+          "text": "A null/unsure answer or a failed question is written to the CSV as unknown/review (distinct from 'no'), not silently as no.",
+          "pass": false,
+          "reason": "The code has no null answers from a service. It writes 'Unclear' for some cases, but many rules default to 'No' when the text is silent, and there is no handling of failed questions.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0141147,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 0,
+      "judged_total": 2
+    },
+    {
+      "id": "lease-review-batch-py__skills+snippet__r1",
+      "task": "lease-review-batch-py",
+      "config": "skills+snippet",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/lease-review-batch-py__skills+snippet__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 16512,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-sage"
+      ],
+      "skill_reads": [
+        "levanto-sage/references/batch.md"
+      ],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Glob": 1,
+        "Skill": 1,
+        "Read": 4,
+        "Write": 1
+      },
+      "cost_usd": 0.07748909999999999,
+      "duration_ms": 15868,
+      "num_turns": 9,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I implemented `review.py`, but I haven't run it. `LEVANTO_API_KEY` isn't set in this session, so nothing has called the API yet.\n\n- **How it works:** it reads every `leases/*.txt` file. It sends each lease's text to Levanto Sage's `/decide/batch` endpoint with all 8 checklist questions as yes/no decisions. Reasoning is set to `auto` because the clauses are legal and multi-step.\n- **Output:** it writes `review.csv` with one row per lease, a `lease` column for the filename, and one column per checklist question.\n- **Unsure answers:** a cell is `yes`, `no` or `unsure`. `unsure` means Sage returned `null` or that question failed, so a person can check it. It is never written as `no`.\n- **Key:** it reads `LEVANTO_API_KEY` from the environment, or from `.env` if the variable isn't set. It exits with a clear message if the key is missing.\n\nTo run it, put your key in `.env` and run `python review.py`. It needs `httpx` installed.\n\nAll leases go out in a single batch request. That's fine for the current single lease, `unit-4b.txt`. With a large number of leases you'd want to split them into chunks.",
+      "snippet_installed": true,
+      "changed_files": [
+        {
+          "path": "review.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 2674,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /decide/batch",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "requests",
+          "desc": "batch body has requests",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "kind",
+          "desc": "checklist items are yesno",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "ok_check",
+          "desc": "checks `ok` on each answer",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "null",
+          "desc": "explicit None branch (strict; graded null_safe is the semantic check)",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 8,
+      "checks_total": 9,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "one_call",
+          "text": "All checklist questions for a lease are sent together (one batch call per lease or for all leases), not one HTTP call per question.",
+          "pass": true,
+          "reason": "All leases and all checklist questions are sent in a single /decide/batch call.",
+          "graded": true
+        },
+        {
+          "id": "null_csv",
+          "text": "A null/unsure answer or a failed question is written to the CSV as unknown/review (distinct from 'no'), not silently as no.",
+          "pass": true,
+          "reason": "Null answers and failed questions (ok false) are written as 'unsure', distinct from 'no'.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0105267,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 2,
+      "judged_total": 2
+    },
+    {
+      "id": "lease-review-batch-py__skills__r1",
+      "task": "lease-review-batch-py",
+      "config": "skills",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/lease-review-batch-py__skills__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 20903,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [],
+      "skill_reads": [
+        "levanto-sage/SKILL.md",
+        "levanto-sage/references/batch.md"
+      ],
+      "levanto_skills_loaded": [
+        "levanto-sage"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Glob": 1,
+        "Read": 6,
+        "Write": 1
+      },
+      "cost_usd": 0.08266000000000001,
+      "duration_ms": 20172,
+      "num_turns": 9,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I implemented `review.py`, but I haven't run it. There's no `LEVANTO_API_KEY` here, so the Sage calls are untested.\n\n**How it works**\n- **Calls:** each lease in `leases/*.txt` gets one call to Sage's `/decide/batch` endpoint. That call asks all 8 checklist questions as yes/no decisions.\n- **Reasoning:** I turned on `\"reasoning\": \"auto\"` because some questions need arithmetic, such as the deposit compared with six months of rent.\n- **Output:** `review.csv` has one row per lease, with the lease filename (without `.txt`) first and then one column per checklist question.\n- **Cell values:** each cell is `yes`, `no`, `unsure` or `error`. `unsure` means Sage returned `null` and a person should check it, rather than reading it as \"no\". `error` means that question failed.\n- **Failures and retries:** a failed question doesn't stop the others. Requests that get a 429 or 503 are retried, and the script exits with a clear message if the key is missing.\n- **Dependency:** it needs `httpx` installed.\n\nTo run it, put your key in `.env` (copied from `.env.example`) or export it, then run `LEVANTO_API_KEY=... python review.py`. The script doesn't read `.env` itself, so the key has to be in your environment.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "review.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 2547,
+      "checks": [
+        {
+          "id": "endpoint",
+          "desc": "calls /decide/batch",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "host",
+          "desc": "talks to api.levanto.ai",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "requests",
+          "desc": "batch body has requests",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "kind",
+          "desc": "checklist items are yesno",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "ok_check",
+          "desc": "checks `ok` on each answer",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "null",
+          "desc": "explicit None branch (strict; graded null_safe is the semantic check)",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "review.py"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_llm",
+          "desc": "no LLM SDK / chat endpoint for a judgment",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": true,
+        "used_llm": false,
+        "used_levanto": true
+      },
+      "checks_passed": 9,
+      "checks_total": 9,
+      "chose_sage": true,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "one_call",
+          "text": "All checklist questions for a lease are sent together (one batch call per lease or for all leases), not one HTTP call per question.",
+          "pass": true,
+          "reason": "All checklist questions for a lease are sent in one /decide/batch request per lease, not one call per question.",
+          "graded": true
+        },
+        {
+          "id": "null_csv",
+          "text": "A null/unsure answer or a failed question is written to the CSV as unknown/review (distinct from 'no'), not silently as no.",
+          "pass": true,
+          "reason": "Null answers are written as \"unsure\" and failed questions as \"error\", both distinct from \"no\".",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0103307,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 2,
+      "judged_total": 2
+    },
+    {
+      "id": "llm-migrate-py__none__r1",
+      "task": "llm-migrate-py",
+      "config": "none",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/llm-migrate-py__none__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 16055,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5",
+        "claude-haiku-5-5"
+      ],
+      "init_skills": [
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [],
+      "skill_reads": [],
+      "levanto_skills_loaded": [],
+      "web_fetches": [],
+      "web_searches": [
+        "Levanto LLM API automatic model selection python SDK"
+      ],
+      "tool_counts": {
+        "Glob": 2,
+        "Grep": 1,
+        "Read": 3,
+        "WebSearch": 1
+      },
+      "cost_usd": 0.0526359,
+      "duration_ms": 15382,
+      "num_turns": 8,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I haven't changed `chat.py`, because I couldn't find any documentation for Levanto. A web search returned nothing for it, and the repo only mentions it as `LEVANTO_API_KEY=` in `.env.example`. I'd rather not guess the base URL or how it picks a model, since a wrong guess would fail at runtime.\n\nCan you tell me:\n1. **The endpoint.** What is the base URL, and is it OpenAI-compatible? If it is, the migration is small. I'd switch `OpenAI(...)` to `base_url=<levanto url>, api_key=os.environ[\"LEVANTO_API_KEY\"]` and keep `chat.completions.create`.\n2. **How to request automatic selection.** Is it a special model value such as `\"auto\"`, or an omitted `model`, or a different parameter? I'd drop the hardcoded `\"gpt-4o\"` and use whatever Levanto expects.\n3. **Whether it needs its own SDK.** If it does, I'd replace `openai` in `requirements.txt` with that package.\n\nA docs link or a sample request would answer all three. I'd also keep `temperature=0.3` unless Levanto's auto-selection doesn't support it.",
+      "snippet_installed": false,
+      "changed_files": [],
+      "diff_chars": 0,
+      "checks": [
+        {
+          "id": "base_url",
+          "desc": "uses the LLM base URL https://api.levanto.ai/v1",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "model_auto",
+          "desc": "model: \"auto\"",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "keeps_client",
+          "desc": "keeps the OpenAI client",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_openai_key",
+          "desc": "no OPENAI_API_KEY left in chat.py",
+          "type": "not_regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_gpt4o",
+          "desc": "no hardcoded gpt-4o model",
+          "type": "not_regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_sage",
+          "desc": "does not call Sage endpoints",
+          "type": "not_regex",
+          "pass": false,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": false,
+        "used_sage": false,
+        "used_llm": false,
+        "used_levanto": false
+      },
+      "checks_passed": 0,
+      "checks_total": 8,
+      "chose_sage": null,
+      "avoided_sage": null,
+      "right_skill": false,
+      "skill_triggered": false,
+      "judged": [
+        {
+          "id": "behaviour",
+          "text": "reply() keeps its signature and behaviour (system prompt, history, returns the message text); the change is minimal.",
+          "pass": false,
+          "reason": "The agent made no changes, so chat.py was not moved to Levanto and the expectation isn't satisfied.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0053287000000000005,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 0,
+      "judged_total": 1
+    },
+    {
+      "id": "llm-migrate-py__skills__r1",
+      "task": "llm-migrate-py",
+      "config": "skills",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/llm-migrate-py__skills__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 8064,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-llms"
+      ],
+      "skill_reads": [],
+      "levanto_skills_loaded": [
+        "levanto-llms"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Skill": 1,
+        "Read": 1,
+        "Edit": 2
+      },
+      "cost_usd": 0.040532599999999995,
+      "duration_ms": 7245,
+      "num_turns": 6,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I moved `chat.py` to Levanto. I haven't run it or any tests.\n\n- **Client:** it now uses `base_url=\"https://api.levanto.ai/v1\"` and reads the key from `LEVANTO_API_KEY` instead of `OPENAI_API_KEY`. It's still the OpenAI SDK.\n- **Model:** `gpt-4o` is now `\"auto\"`, so the router picks a model for each request.\n- **Temperature:** I left `temperature=0.3` as it was. It's a portable field, but whichever model the router picks decides how it's applied.\n\nSet `LEVANTO_API_KEY` (an `lv_live_...` key) in your environment before running.\n\nTo control the spending target, you can add `extra_body={\"target\": \"economy\"}` to the call. `\"balanced\"` and `\"quality\"` are the other options. Without it, the key's router setting applies, which is Balanced if the key has none.\n\nThe model that answered is in `resp.model`.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "chat.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 635,
+      "checks": [
+        {
+          "id": "base_url",
+          "desc": "uses the LLM base URL https://api.levanto.ai/v1",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "chat.py"
+          ]
+        },
+        {
+          "id": "model_auto",
+          "desc": "model: \"auto\"",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "chat.py"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "chat.py"
+          ]
+        },
+        {
+          "id": "keeps_client",
+          "desc": "keeps the OpenAI client",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "chat.py"
+          ]
+        },
+        {
+          "id": "no_openai_key",
+          "desc": "no OPENAI_API_KEY left in chat.py",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_gpt4o",
+          "desc": "no hardcoded gpt-4o model",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_sage",
+          "desc": "does not call Sage endpoints",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": false,
+        "used_llm": true,
+        "used_levanto": true
+      },
+      "checks_passed": 8,
+      "checks_total": 8,
+      "chose_sage": null,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "behaviour",
+          "text": "reply() keeps its signature and behaviour (system prompt, history, returns the message text); the change is minimal.",
+          "pass": true,
+          "reason": "The diff only changes the client base_url and api_key and sets the model to \"auto\". The reply() signature, system prompt, history handling, temperature and return are unchanged, so the change is minimal.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.006806700000000001,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 1,
+      "judged_total": 1
+    },
+    {
+      "id": "llm-migrate-py__skills+snippet__r1",
+      "task": "llm-migrate-py",
+      "config": "skills+snippet",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/llm-migrate-py__skills+snippet__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 8056,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-llms"
+      ],
+      "skill_reads": [],
+      "levanto_skills_loaded": [
+        "levanto-llms"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Skill": 1,
+        "Read": 1,
+        "Edit": 2
+      },
+      "cost_usd": 0.0424274,
+      "duration_ms": 7287,
+      "num_turns": 6,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "The chat call in `chat.py` now goes through Levanto, with `model=\"auto\"` so the router picks a model on each request. I haven't run it or any tests.\n\n- **Client:** it uses `base_url=\"https://api.levanto.ai/v1\"` and reads the key from `LEVANTO_API_KEY`. The key was `OPENAI_API_KEY` before. Set `LEVANTO_API_KEY` in your environment before running.\n- **Model:** `\"gpt-4o\"` is now `\"auto\"`.\n- **Temperature:** I kept `temperature=0.3`. Whether a given model honors it may vary.\n- **Cost and quality:** to steer this per call, pass `extra_body={\"target\": \"economy\" | \"balanced\" | \"quality\"}`. Without it, the key's router setting applies, or Balanced if the key has none.\n- **Which model answered:** `resp.model` shows it.",
+      "snippet_installed": true,
+      "changed_files": [
+        {
+          "path": "chat.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 635,
+      "checks": [
+        {
+          "id": "base_url",
+          "desc": "uses the LLM base URL https://api.levanto.ai/v1",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "chat.py"
+          ]
+        },
+        {
+          "id": "model_auto",
+          "desc": "model: \"auto\"",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "chat.py"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "chat.py"
+          ]
+        },
+        {
+          "id": "keeps_client",
+          "desc": "keeps the OpenAI client",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "chat.py"
+          ]
+        },
+        {
+          "id": "no_openai_key",
+          "desc": "no OPENAI_API_KEY left in chat.py",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_gpt4o",
+          "desc": "no hardcoded gpt-4o model",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_sage",
+          "desc": "does not call Sage endpoints",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": false,
+        "used_llm": true,
+        "used_levanto": true
+      },
+      "checks_passed": 8,
+      "checks_total": 8,
+      "chose_sage": null,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "behaviour",
+          "text": "reply() keeps its signature and behaviour (system prompt, history, returns the message text); the change is minimal.",
+          "pass": true,
+          "reason": "The diff only changes the client base_url and API key and sets model to \"auto\". The reply() signature, system prompt, history handling, temperature and return are unchanged.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0067066999999999995,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 1,
+      "judged_total": 1
+    },
+    {
+      "id": "llm-summarize-ts__skills__r1",
+      "task": "llm-summarize-ts",
+      "config": "skills",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/llm-summarize-ts__skills__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 14080,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-llms"
+      ],
+      "skill_reads": [],
+      "levanto_skills_loaded": [
+        "levanto-llms"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Skill": 1,
+        "Read": 2,
+        "Grep": 1,
+        "Edit": 3
+      },
+      "cost_usd": 0.0579414,
+      "duration_ms": 13236,
+      "num_turns": 9,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I added `POST /threads/:id/summary` to `src/server.ts`. I haven't run it, type-checked it, or called Levanto.\n\n- **Request:** the body is `{ \"messages\": [{ \"from\", \"text\", \"at\" }, ...] }`. If `messages` is missing, empty or malformed, the endpoint returns 400.\n- **Summary:** the handler sends the messages as a transcript to Levanto through the OpenAI SDK, with `model: \"auto\"` so the router picks the model. A system prompt asks for exactly 3 one-sentence bullets. The response is `{ threadId, summary }`.\n- **Errors:** if the Levanto call fails, the endpoint logs the error message and returns 502.\n\nI added `openai` (`^4.77.0`) to `package.json` dependencies, so run `npm install` first. Set `LEVANTO_API_KEY` before starting the server.\n\nThe endpoint doesn't check that the model returned exactly 3 bullets. It trusts the prompt for that.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "package.json",
+          "status": "M"
+        },
+        {
+          "path": "src/server.ts",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 2230,
+      "checks": [
+        {
+          "id": "route",
+          "desc": "adds the summary route",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/server.ts"
+          ]
+        },
+        {
+          "id": "base_url",
+          "desc": "uses the LLM base URL https://api.levanto.ai/v1",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/server.ts"
+          ]
+        },
+        {
+          "id": "model_auto",
+          "desc": "model: \"auto\"",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/server.ts"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from process.env",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/server.ts"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_sage",
+          "desc": "does not call Sage endpoints",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": false,
+        "used_llm": true,
+        "used_levanto": true
+      },
+      "checks_passed": 6,
+      "checks_total": 6,
+      "chose_sage": null,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "errors",
+          "text": "The endpoint validates the request body and returns a non-2xx error response (not a crash) when the LLM call fails.",
+          "pass": true,
+          "reason": "The endpoint returns 400 for an invalid or empty messages body and wraps the LLM call in try/catch that returns 502, so a failed call doesn't crash it.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0095187,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 1,
+      "judged_total": 1
+    },
+    {
+      "id": "llm-summarize-ts__none__r1",
+      "task": "llm-summarize-ts",
+      "config": "none",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/llm-summarize-ts__none__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 19476,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5",
+        "claude-haiku-5-5"
+      ],
+      "init_skills": [
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [],
+      "skill_reads": [],
+      "levanto_skills_loaded": [],
+      "web_fetches": [
+        "https://www.everydev.ai/tools/levanto"
+      ],
+      "web_searches": [
+        "Levanto LLM API SDK npm"
+      ],
+      "tool_counts": {
+        "Read": 2,
+        "Grep": 1,
+        "Glob": 2,
+        "WebSearch": 1,
+        "WebFetch": 1
+      },
+      "cost_usd": 0.058054,
+      "duration_ms": 18898,
+      "num_turns": 8,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I haven't changed `src/server.ts`, because I couldn't find out how to call Levanto.\n\n- **What's in the project:** The only trace of Levanto is `LEVANTO_API_KEY=` in `.env.example`. There's no SDK in `package.json` or `node_modules`, and nothing in the code uses it.\n- **What a web search found:** I found no npm package. The only relevant hit was a [directory listing](https://www.everydev.ai/tools/levanto). It describes Levanto as a decision model that answers semantic yes/no questions with probabilities. That doesn't sound like a text-summarization API, so I can't tell whether it can produce 3-bullet summaries at all.\n- **What I couldn't check:** I tried to fetch that listing for its docs link, but the fetch was denied in this session. So I have no base URL, auth scheme, request shape or response shape.\n\nAny call I wrote now would be guessed, and it could fail in ways that are hard to spot.\n\nCould you send one of these?\n- A link to the Levanto docs, or a short example request and response.\n- The npm package name, if there is one.\n- Confirmation that you meant Levanto rather than another provider. If you meant a different one, such as Anthropic, I can write it right away.\n\nOnce I have that, I'll add the endpoint in `src/server.ts`:\n- `POST /threads/:id/summary` takes `{ messages: Message[] }` and returns a 400 if the body is missing or invalid.\n- It formats the messages into a prompt asking for exactly 3 bullets.\n- It calls Levanto with `LEVANTO_API_KEY` and returns `{ threadId, bullets }`.\n- It returns a 502 if the upstream call fails.",
+      "snippet_installed": false,
+      "changed_files": [],
+      "diff_chars": 0,
+      "checks": [
+        {
+          "id": "route",
+          "desc": "adds the summary route",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "base_url",
+          "desc": "uses the LLM base URL https://api.levanto.ai/v1",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "model_auto",
+          "desc": "model: \"auto\"",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from process.env",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_sage",
+          "desc": "does not call Sage endpoints",
+          "type": "not_regex",
+          "pass": false,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": false,
+        "used_sage": false,
+        "used_llm": false,
+        "used_levanto": false
+      },
+      "checks_passed": 0,
+      "checks_total": 6,
+      "chose_sage": null,
+      "avoided_sage": null,
+      "right_skill": false,
+      "skill_triggered": false,
+      "judged": [
+        {
+          "id": "errors",
+          "text": "The endpoint validates the request body and returns a non-2xx error response (not a crash) when the LLM call fails.",
+          "pass": false,
+          "reason": "The agent made no changes, so no endpoint exists to validate input or handle LLM call failures.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0053747,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 0,
+      "judged_total": 1
+    },
+    {
+      "id": "llm-summarize-ts__skills+snippet__r1",
+      "task": "llm-summarize-ts",
+      "config": "skills+snippet",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/llm-summarize-ts__skills+snippet__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 15785,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-llms"
+      ],
+      "skill_reads": [],
+      "levanto_skills_loaded": [
+        "levanto-llms"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Skill": 1,
+        "Read": 1,
+        "Grep": 1,
+        "Edit": 1
+      },
+      "cost_usd": 0.0553481,
+      "duration_ms": 15010,
+      "num_turns": 6,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I added `POST /threads/:id/summary` to `src/server.ts`. I haven't run it or type-checked it, and I didn't call the Levanto API.\n\n- **Input:** it takes `{ \"messages\": [{ \"from\", \"text\", \"at\" }, ...] }` in the body. It returns 400 if `messages` is missing, empty or malformed.\n- **Model call:** it sends the thread as a transcript to Levanto's OpenAI-compatible endpoint (`https://api.levanto.ai/v1/chat/completions`) with `model: \"auto\"`. The system prompt asks for exactly 3 bullets.\n- **Response:** `{ \"threadId\": \"...\", \"summary\": [\"...\", \"...\", \"...\"] }`. It strips the bullet markers and keeps at most 3 lines.\n- **Errors:** it returns 500 if `LEVANTO_API_KEY` isn't set. It returns 502 if the upstream call fails or comes back empty. The key is read from the environment and never logged.\n- **No new dependency:** the project doesn't have the `openai` package, so I used Node's built-in `fetch`. If you'd rather use the OpenAI SDK, say so and I'll swap it in.",
+      "snippet_installed": true,
+      "changed_files": [
+        {
+          "path": "src/server.ts",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 2272,
+      "checks": [
+        {
+          "id": "route",
+          "desc": "adds the summary route",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/server.ts"
+          ]
+        },
+        {
+          "id": "base_url",
+          "desc": "uses the LLM base URL https://api.levanto.ai/v1",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/server.ts"
+          ]
+        },
+        {
+          "id": "model_auto",
+          "desc": "model: \"auto\"",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/server.ts"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from process.env",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "src/server.ts"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_sage",
+          "desc": "does not call Sage endpoints",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": false,
+        "used_llm": true,
+        "used_levanto": true
+      },
+      "checks_passed": 6,
+      "checks_total": 6,
+      "chose_sage": null,
+      "avoided_sage": null,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "errors",
+          "text": "The endpoint validates the request body and returns a non-2xx error response (not a crash) when the LLM call fails.",
+          "pass": true,
+          "reason": "The endpoint validates messages (400 on invalid), and returns 502 on non-ok upstream, empty output, or fetch exceptions via try/catch rather than crashing.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0094867,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 1,
+      "judged_total": 1
+    },
+    {
+      "id": "campaign-email-py__skills__r1",
+      "task": "campaign-email-py",
+      "config": "skills",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/campaign-email-py__skills__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 12548,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-llms"
+      ],
+      "skill_reads": [],
+      "levanto_skills_loaded": [
+        "levanto-llms"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Skill": 1,
+        "Glob": 1,
+        "Read": 1,
+        "Edit": 1
+      },
+      "cost_usd": 0.046783,
+      "duration_ms": 11791,
+      "num_turns": 6,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I added `generate_campaign_email(product, audience)` to `marketing.py`. I haven't run it, because that needs a live `LEVANTO_API_KEY`.\n\n- **Signature:** it takes a `Product` and an audience string, and returns `(subject, body)`. That matches the argument order of `schedule(email_subject, email_body, audience)`.\n- **Model call:** it calls Levanto through the OpenAI SDK at `https://api.levanto.ai/v1` with `model=\"auto\"`. The key comes from the `LEVANTO_API_KEY` environment variable.\n- **Prompt:** it includes the product's name, tagline, price and features, plus the audience. It asks for a `Subject:` line, then a blank line, then a plain-text body that ends with a call to action.\n- **Bad responses:** if the response has no `Subject:` line, it raises `ValueError`. It doesn't guess at a subject.\n\nThe project needs the `openai` package installed. I didn't add a dependency file. Tell me if you'd like the router pinned to a spending target such as `\"economy\"` or `\"quality\"`.",
+      "snippet_installed": false,
+      "changed_files": [
+        {
+          "path": "marketing.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 1711,
+      "checks": [
+        {
+          "id": "func",
+          "desc": "defines generate_campaign_email",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "marketing.py"
+          ]
+        },
+        {
+          "id": "base_url",
+          "desc": "uses the LLM base URL https://api.levanto.ai/v1",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "marketing.py"
+          ]
+        },
+        {
+          "id": "model_auto",
+          "desc": "model: \"auto\"",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "marketing.py"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "marketing.py"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_sage",
+          "desc": "does not call Sage endpoints",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": false,
+        "used_llm": true,
+        "used_levanto": true
+      },
+      "checks_passed": 6,
+      "checks_total": 6,
+      "chose_sage": null,
+      "avoided_sage": true,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "generates",
+          "text": "The email text is generated by an LLM call (not a fixed template only) and the function returns both a subject and a body.",
+          "pass": true,
+          "reason": "The function calls Levanto's OpenAI-compatible chat completions API (model \"auto\") to generate the email text, parses the response, and returns a (subject, body) tuple.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0084207,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 1,
+      "judged_total": 1
+    },
+    {
+      "id": "campaign-email-py__skills+snippet__r1",
+      "task": "campaign-email-py",
+      "config": "skills+snippet",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/campaign-email-py__skills+snippet__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 13057,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5"
+      ],
+      "init_skills": [
+        "levanto-llms",
+        "levanto-sage",
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [
+        "levanto-llms"
+      ],
+      "skill_reads": [],
+      "levanto_skills_loaded": [
+        "levanto-llms"
+      ],
+      "web_fetches": [],
+      "web_searches": [],
+      "tool_counts": {
+        "Skill": 1,
+        "Glob": 1,
+        "Read": 1,
+        "Edit": 2
+      },
+      "cost_usd": 0.0496439,
+      "duration_ms": 12270,
+      "num_turns": 7,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I added `generate_campaign_email(product, audience)` to `marketing.py`. I haven't run it or tested it, and I didn't call the API.\n\n- **What it does:** it takes a `Product` and an audience string and returns `(subject, body)`. That pair can go straight into `schedule()`.\n- **How it calls Levanto:** it uses the OpenAI SDK pointed at `https://api.levanto.ai/v1` with `model=\"auto\"`. The key comes from `LEVANTO_API_KEY`.\n- **Output format:** the prompt asks for a JSON object with `subject` and `body`, and the function parses it. I set `response_format={\"type\": \"json_object\"}` to encourage valid JSON, but I haven't confirmed that `auto` honors that setting for every model it might pick. If the model returns something that isn't valid JSON, `json.loads` will raise an error.\n- **Dependency:** the `openai` package needs to be installed. I didn't check whether it's already in the project.\n\nI didn't add retries or error handling for API failures.",
+      "snippet_installed": true,
+      "changed_files": [
+        {
+          "path": "marketing.py",
+          "status": "M"
+        }
+      ],
+      "diff_chars": 1490,
+      "checks": [
+        {
+          "id": "func",
+          "desc": "defines generate_campaign_email",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "marketing.py"
+          ]
+        },
+        {
+          "id": "base_url",
+          "desc": "uses the LLM base URL https://api.levanto.ai/v1",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "marketing.py"
+          ]
+        },
+        {
+          "id": "model_auto",
+          "desc": "model: \"auto\"",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "marketing.py"
+          ]
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": true,
+          "hits": [
+            "marketing.py"
+          ]
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        },
+        {
+          "id": "no_sage",
+          "desc": "does not call Sage endpoints",
+          "type": "not_regex",
+          "pass": true,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": true,
+        "used_sage": false,
+        "used_llm": true,
+        "used_levanto": true
+      },
+      "checks_passed": 6,
+      "checks_total": 6,
+      "chose_sage": null,
+      "avoided_sage": true,
+      "right_skill": true,
+      "skill_triggered": true,
+      "judged": [
+        {
+          "id": "generates",
+          "text": "The email text is generated by an LLM call (not a fixed template only) and the function returns both a subject and a body.",
+          "pass": true,
+          "reason": "The function calls an LLM (Levanto's OpenAI-compatible chat completions, model auto) to generate the email and returns both subject and body parsed from the JSON response.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.008100699999999999,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 1,
+      "judged_total": 1
+    },
+    {
+      "id": "campaign-email-py__none__r1",
+      "task": "campaign-email-py",
+      "config": "none",
+      "rep": 1,
+      "job_dir": "/private/tmp/levanto-skill-evals/runs/round1-2026-11-24/campaign-email-py__none__r1",
+      "exit_code": 0,
+      "timed_out": false,
+      "wall_ms": 17530,
+      "isolation_problems": [],
+      "model_reported": "claude-sonnet-5-5",
+      "models_used": [
+        "claude-sonnet-5-5",
+        "claude-haiku-5-5"
+      ],
+      "init_skills": [
+        "deep-research",
+        "design",
+        "design-sync",
+        "dataviz",
+        "update-config",
+        "verify",
+        "debug",
+        "code-review",
+        "simplify",
+        "ship-local",
+        "steward",
+        "batch",
+        "fewer-permission-prompts",
+        "doctor",
+        "loop",
+        "schedule",
+        "claude-api",
+        "workflow-authoring",
+        "run",
+        "run-skill-generator",
+        "plugin-authoring"
+      ],
+      "init_tools": [
+        "Edit",
+        "Glob",
+        "Grep",
+        "Read",
+        "Skill",
+        "WebFetch",
+        "WebSearch",
+        "Write"
+      ],
+      "skill_calls": [],
+      "skill_reads": [],
+      "levanto_skills_loaded": [],
+      "web_fetches": [],
+      "web_searches": [
+        "Levanto AI API Python SDK text generation"
+      ],
+      "tool_counts": {
+        "Glob": 1,
+        "Grep": 1,
+        "Read": 2,
+        "WebSearch": 1
+      },
+      "cost_usd": 0.0508705,
+      "duration_ms": 16937,
+      "num_turns": 6,
+      "result_subtype": "success",
+      "is_error": false,
+      "final_text": "I haven't written any code yet, because I can't find out how Levanto's API works. I'd rather not guess at it.\n\n- **In the repo:** the only mention is `LEVANTO_API_KEY=` in `.env.example`. There's no client, SDK import or wrapper to copy.\n- **On the web:** a search turned up nothing on Levanto's API or Python SDK. The results were for other providers (Cohere, OpenAI-compatible endpoints and so on). Sources: [Cohere generate endpoint](https://docs.cohere.com/docs/the-generate-endpoint), [Python AI SDK](https://jverre.github.io/ai-sdk/guides/text_generation).\n\nIf I guessed the package name, endpoint or response shape, the code would look finished but fail at runtime.\n\nCould you send one of these?\n1. A link to the Levanto docs.\n2. The package name and a short example call, such as `from levanto import Client; Client(...).generate(...)`.\n3. An existing file in another repo that calls Levanto, which I can copy the pattern from.\n\nOnce I have that, I'll write `generate_campaign_email(product: Product, audience: str)` in `marketing.py`. The plan:\n- It will build a prompt from the `Product` fields (name, tagline, features, price) and the audience.\n- It will read `LEVANTO_API_KEY` from the environment.\n- It will return the subject and body in a form that can be passed straight to `schedule(email_subject, email_body, audience)`.\n\nDo you want it to return a `(subject, body)` tuple, or a small dataclass?",
+      "snippet_installed": false,
+      "changed_files": [],
+      "diff_chars": 0,
+      "checks": [
+        {
+          "id": "func",
+          "desc": "defines generate_campaign_email",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "base_url",
+          "desc": "uses the LLM base URL https://api.levanto.ai/v1",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "model_auto",
+          "desc": "model: \"auto\"",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "env_key",
+          "desc": "reads LEVANTO_API_KEY from the environment",
+          "type": "regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_key",
+          "desc": "no hardcoded lv_live_ key",
+          "type": "not_regex",
+          "pass": false,
+          "hits": []
+        },
+        {
+          "id": "no_sage",
+          "desc": "does not call Sage endpoints",
+          "type": "not_regex",
+          "pass": false,
+          "hits": []
+        }
+      ],
+      "choice": {
+        "produced_code": false,
+        "used_sage": false,
+        "used_llm": false,
+        "used_levanto": false
+      },
+      "checks_passed": 0,
+      "checks_total": 6,
+      "chose_sage": null,
+      "avoided_sage": false,
+      "right_skill": false,
+      "skill_triggered": false,
+      "judged": [
+        {
+          "id": "generates",
+          "text": "The email text is generated by an LLM call (not a fixed template only) and the function returns both a subject and a body.",
+          "pass": false,
+          "reason": "The agent made no changes, so no generate_campaign_email function or LLM call exists.",
+          "graded": true
+        }
+      ],
+      "judge_cost_usd": 0.0053047,
+      "judge_model": [
+        "claude-sonnet-5-5"
+      ],
+      "judged_passed": 0,
+      "judged_total": 1
+    }
+  ],
+  "judge_cost_usd": 0.3192189,
+  "graded_at": "2026-11-24T14:55:05.881Z"
+}

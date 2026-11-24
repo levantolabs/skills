@@ -1,0 +1,241 @@
+{
+  "version": 1,
+  "notes": "Checks run on the final content of every file the agent added or changed (outside .claude/ and CLAUDE.md). A check with `files` only looks at changed files whose path matches that regex. `use` pulls a check from `macros`; fields given next to `use` override it.",
+  "macros": {
+    "levanto_host": { "type": "regex", "pattern": "api\\.levanto\\.ai", "desc": "talks to api.levanto.ai" },
+    "env_key_py": { "type": "regex", "pattern": "(os\\.environ(\\.get)?\\s*[\\[(]\\s*[\"']LEVANTO_API_KEY|os\\.getenv\\(\\s*[\"']LEVANTO_API_KEY)", "desc": "reads LEVANTO_API_KEY from the environment" },
+    "env_key_ts": { "type": "regex", "pattern": "process\\.env(\\.LEVANTO_API_KEY|\\[\\s*[\"']LEVANTO_API_KEY)", "desc": "reads LEVANTO_API_KEY from process.env" },
+    "no_key_literal": { "type": "not_regex", "pattern": "lv_live_[A-Za-z0-9]{6,}", "desc": "no hardcoded lv_live_ key" },
+    "no_llm_for_judgment": { "type": "not_regex", "pattern": "(from openai|import openai|from [\"']openai[\"']|require\\([\"']openai|import anthropic|from anthropic|@anthropic-ai/sdk|chat/completions|/v1/messages|/v1/responses|generativeai|ChatCompletion|ChatOpenAI)", "desc": "no LLM SDK / chat endpoint for a judgment" },
+    "null_py": { "type": "regex", "pattern": "(\\bis\\s+(not\\s+)?None\\b|[!=]=\\s*None\\b)", "desc": "explicit None branch (strict; graded null_safe is the semantic check)" },
+    "null_ts": { "type": "regex", "pattern": "([!=]==?\\s*null\\b|\\bnull\\s*[!=]==?)", "desc": "explicit null branch (strict; graded null_safe is the semantic check)" },
+    "no_sage": { "type": "not_regex", "pattern": "(/decide|/v1/extract|/v1/stream)", "desc": "does not call Sage endpoints" },
+    "llm_base": { "type": "regex", "pattern": "api\\.levanto\\.ai/v1", "desc": "uses the LLM base URL https://api.levanto.ai/v1" },
+    "model_auto": { "type": "regex", "pattern": "model[\"']?\\s*[:=]\\s*[\"']auto[\"']", "desc": "model: \"auto\"" }
+  },
+  "sage_endpoint_pattern": "(/decide|/v1/extract|/v1/stream)",
+  "tasks": [
+    {
+      "id": "ticket-triage-py",
+      "scaffold": "ticket-triage-py",
+      "category": "decide",
+      "should_use_sage": true,
+      "expected_skill": "levanto-sage",
+      "mentions_levanto": true,
+      "prompt": "We use Levanto. Add triage to the POST /tickets endpoint in app.py: put each new ticket in the refund, bug or other queue.",
+      "checks": [
+        { "id": "endpoint", "type": "regex", "pattern": "/decide\\b", "desc": "calls /decide" },
+        { "use": "levanto_host", "id": "host" },
+        { "id": "kind", "type": "regex", "pattern": "[\"']?kind[\"']?\\s*[:=]\\s*[\"']choice[\"']", "desc": "kind is choice" },
+        { "id": "options", "type": "regex", "pattern": "^(?=[\\s\\S]*[\"']refund[\"'])(?=[\\s\\S]*[\"']bug[\"'])(?=[\\s\\S]*[\"']other[\"'])", "desc": "refund, bug and other options" },
+        { "use": "null_py", "id": "null" },
+        { "use": "env_key_py", "id": "env_key" },
+        { "use": "no_key_literal", "id": "no_key" },
+        { "use": "no_llm_for_judgment", "id": "no_llm" }
+      ],
+      "judged": [
+        { "id": "null_safe", "text": "When the decision comes back null/unsure, the ticket goes to a safe place (manual review, 'other' or unrouted) and the code does not crash or treat it as refund or bug." },
+        { "id": "failure_safe", "text": "The HTTP call has a timeout, and if the triage call fails the ticket is still created (it is not lost and the endpoint does not return a 500 because of triage)." }
+      ]
+    },
+    {
+      "id": "forum-moderation-ts",
+      "scaffold": "forum-moderation-ts",
+      "category": "decide",
+      "should_use_sage": true,
+      "expected_skill": "levanto-sage",
+      "mentions_levanto": false,
+      "prompt": "Add a moderation hook so new forum posts that are harassment or spam get held for review instead of published.",
+      "checks": [
+        { "id": "endpoint", "type": "regex", "pattern": "/decide\\b", "desc": "calls /decide" },
+        { "use": "levanto_host", "id": "host" },
+        { "id": "kind", "type": "regex", "pattern": "[\"']?kind[\"']?\\s*[:=]\\s*[\"'](yesno|tags|choice)[\"']", "desc": "kind is yesno, tags or choice" },
+        { "id": "hook", "type": "regex", "pattern": "registerBeforePublish\\(", "desc": "registers a beforePublish hook" },
+        { "use": "null_ts", "id": "null" },
+        { "use": "env_key_ts", "id": "env_key" },
+        { "use": "no_key_literal", "id": "no_key" },
+        { "use": "no_llm_for_judgment", "id": "no_llm" }
+      ],
+      "judged": [
+        { "id": "null_safe", "text": "A null/unsure answer (yesno answer null, or tag applies null) results in the post being held for review, not published as if it were clean." },
+        { "id": "both_covered", "text": "Both harassment and spam are checked, each with a clear definition in the question instructions or tag names." }
+      ]
+    },
+    {
+      "id": "contract-review-py",
+      "scaffold": "contract-review-py",
+      "category": "decide",
+      "should_use_sage": true,
+      "expected_skill": "levanto-sage",
+      "mentions_levanto": false,
+      "prompt": "In contracts.py, make process() send contracts that need legal review to legal and approve the rest.",
+      "checks": [
+        { "id": "endpoint", "type": "regex", "pattern": "/decide\\b", "desc": "calls /decide" },
+        { "use": "levanto_host", "id": "host" },
+        { "id": "kind", "type": "regex", "pattern": "[\"']?kind[\"']?\\s*[:=]\\s*[\"'](yesno|choice|tags)[\"']", "desc": "kind is yesno, choice or tags" },
+        { "id": "routes_legal", "type": "regex", "pattern": "send_to_legal\\(", "desc": "process() can call send_to_legal" },
+        { "use": "null_py", "id": "null" },
+        { "use": "env_key_py", "id": "env_key" },
+        { "use": "no_key_literal", "id": "no_key" },
+        { "use": "no_llm_for_judgment", "id": "no_llm" }
+      ],
+      "judged": [
+        { "id": "null_safe", "text": "When the decision is null/unsure (or the call fails), the contract is sent to legal rather than approved." },
+        { "id": "criteria", "text": "The judgment is made by a model/API on the contract text with concrete criteria (e.g. liability, auto-renewal, governing law), not only by a hand-written keyword list." }
+      ]
+    },
+    {
+      "id": "invoice-extract-py",
+      "scaffold": "invoice-extract-py",
+      "category": "extract",
+      "should_use_sage": true,
+      "expected_skill": "levanto-sage",
+      "mentions_levanto": true,
+      "prompt": "We use Levanto. Implement parse_invoice in invoices.py: it should return the vendor, invoice number, total and due date.",
+      "checks": [
+        { "id": "endpoint", "type": "regex", "pattern": "/v1/extract\\b", "desc": "calls /v1/extract" },
+        { "use": "levanto_host", "id": "host" },
+        { "id": "money", "type": "regex", "pattern": "[\"']?type[\"']?\\s*[:=]\\s*[\"']money[\"']", "desc": "total uses type money" },
+        { "id": "date", "type": "regex", "pattern": "[\"']?type[\"']?\\s*[:=]\\s*[\"']date[\"']", "desc": "due date uses type date" },
+        { "use": "env_key_py", "id": "env_key" },
+        { "use": "no_key_literal", "id": "no_key" },
+        { "use": "no_llm_for_judgment", "id": "no_llm" }
+      ],
+      "judged": [
+        { "id": "fields", "text": "parse_invoice returns all four fields (vendor, invoice number, total, due date) read from the API response's `values`." },
+        { "id": "null_safe", "text": "Missing or unsure fields come back as None (or are flagged) rather than being invented, defaulted to a fake value, or crashing the function." }
+      ]
+    },
+    {
+      "id": "order-extract-ts",
+      "scaffold": "order-extract-ts",
+      "category": "extract",
+      "should_use_sage": true,
+      "expected_skill": "levanto-sage",
+      "mentions_levanto": false,
+      "prompt": "Implement parseOrder in src/orders.ts so it turns a customer's WhatsApp message into an Order.",
+      "checks": [
+        { "id": "endpoint", "type": "regex", "pattern": "/v1/extract\\b", "desc": "calls /v1/extract" },
+        { "use": "levanto_host", "id": "host" },
+        { "id": "time", "type": "regex", "pattern": "[\"']?type[\"']?\\s*:\\s*[\"']time[\"']", "desc": "pickup time uses type time" },
+        { "id": "list_field", "type": "regex", "pattern": "items[\"']?\\s*:\\s*\\[\\s*[\"'`]", "desc": "items is a one-item list field" },
+        { "use": "env_key_ts", "id": "env_key" },
+        { "use": "no_key_literal", "id": "no_key" },
+        { "use": "no_llm_for_judgment", "id": "no_llm" }
+      ],
+      "judged": [
+        { "id": "maps_order", "text": "The function returns an Order with customer, items and pickupTime mapped from the API response, keeping null for customer/pickupTime when absent and an empty array when no items." }
+      ]
+    },
+    {
+      "id": "call-escalation-stream-py",
+      "scaffold": "call-escalation-stream-py",
+      "category": "stream",
+      "should_use_sage": true,
+      "expected_skill": "levanto-sage",
+      "mentions_levanto": false,
+      "prompt": "In call_monitor.py, notify the supervisor as soon as a caller asks to talk to a human, while the call is still live.",
+      "checks": [
+        { "id": "endpoint", "type": "regex", "pattern": "wss://[^\"'\\s]*/v1/stream|/v1/stream", "desc": "opens the /v1/stream WebSocket" },
+        { "use": "levanto_host", "id": "host" },
+        { "id": "start_frame", "type": "regex", "pattern": "[\"']type[\"']\\s*:\\s*[\"']start[\"']", "desc": "sends a start frame" },
+        { "id": "append_frame", "type": "regex", "pattern": "[\"']type[\"']\\s*:\\s*[\"']append[\"']", "desc": "sends append frames" },
+        { "id": "kind", "type": "regex", "pattern": "[\"']?kind[\"']?\\s*[:=]\\s*[\"']yesno[\"']", "desc": "kind is yesno" },
+        { "id": "no_per_line_decide", "type": "not_regex", "pattern": "/decide", "desc": "does not call /decide per line" },
+        { "use": "env_key_py", "id": "env_key" },
+        { "use": "no_key_literal", "id": "no_key" },
+        { "use": "no_llm_for_judgment", "id": "no_llm" }
+      ],
+      "judged": [
+        { "id": "one_socket", "text": "One WebSocket session per call: opened when the call starts (or on first line), each transcript line sent as an append on the same socket, closed when the call ends." },
+        { "id": "notify_once", "text": "The supervisor is notified when the answer becomes yes (reading the decision frame's `changed`/`answers`), at most once per call, and a null answer does not notify." }
+      ]
+    },
+    {
+      "id": "lease-review-batch-py",
+      "scaffold": "lease-review-batch-py",
+      "category": "batch",
+      "should_use_sage": true,
+      "expected_skill": "levanto-sage",
+      "mentions_levanto": false,
+      "prompt": "Implement review.py: answer every checklist question for each lease and write review.csv.",
+      "checks": [
+        { "id": "endpoint", "type": "regex", "pattern": "/decide/batch\\b", "desc": "calls /decide/batch" },
+        { "use": "levanto_host", "id": "host" },
+        { "id": "requests", "type": "regex", "pattern": "[\"']requests[\"']", "desc": "batch body has requests" },
+        { "id": "kind", "type": "regex", "pattern": "[\"']?kind[\"']?\\s*[:=]\\s*[\"']yesno[\"']", "desc": "checklist items are yesno" },
+        { "id": "ok_check", "type": "regex", "pattern": "(\\[[\"']ok[\"']\\]|\\.get\\(\\s*[\"']ok[\"'])", "desc": "checks `ok` on each answer" },
+        { "use": "null_py", "id": "null" },
+        { "use": "env_key_py", "id": "env_key" },
+        { "use": "no_key_literal", "id": "no_key" },
+        { "use": "no_llm_for_judgment", "id": "no_llm" }
+      ],
+      "judged": [
+        { "id": "one_call", "text": "All checklist questions for a lease are sent together (one batch call per lease or for all leases), not one HTTP call per question." },
+        { "id": "null_csv", "text": "A null/unsure answer or a failed question is written to the CSV as unknown/review (distinct from 'no'), not silently as no." }
+      ]
+    },
+    {
+      "id": "llm-migrate-py",
+      "scaffold": "llm-migrate-py",
+      "category": "llm",
+      "should_use_sage": false,
+      "expected_skill": "levanto-llms",
+      "mentions_levanto": true,
+      "prompt": "Move the chat call in chat.py to Levanto and let it pick the model automatically per request.",
+      "checks": [
+        { "use": "llm_base", "id": "base_url" },
+        { "use": "model_auto", "id": "model_auto" },
+        { "use": "env_key_py", "id": "env_key" },
+        { "id": "keeps_client", "type": "regex", "pattern": "from openai import (Async)?OpenAI", "files": "chat\\.py$", "desc": "keeps the OpenAI client" },
+        { "id": "no_openai_key", "type": "not_regex", "pattern": "OPENAI_API_KEY", "files": "chat\\.py$", "desc": "no OPENAI_API_KEY left in chat.py" },
+        { "id": "no_gpt4o", "type": "not_regex", "pattern": "gpt-4o", "files": "chat\\.py$", "desc": "no hardcoded gpt-4o model" },
+        { "use": "no_key_literal", "id": "no_key" },
+        { "use": "no_sage", "id": "no_sage" }
+      ],
+      "judged": [
+        { "id": "behaviour", "text": "reply() keeps its signature and behaviour (system prompt, history, returns the message text); the change is minimal." }
+      ]
+    },
+    {
+      "id": "llm-summarize-ts",
+      "scaffold": "llm-summarize-ts",
+      "category": "llm",
+      "should_use_sage": false,
+      "expected_skill": "levanto-llms",
+      "mentions_levanto": true,
+      "prompt": "Add a POST /threads/:id/summary endpoint to src/server.ts that summarizes a support thread in 3 bullet points, using Levanto. Take the messages in the request body.",
+      "checks": [
+        { "id": "route", "type": "regex", "pattern": "app\\.post\\(\\s*[\"'`][^\"'`]*summar", "desc": "adds the summary route" },
+        { "use": "llm_base", "id": "base_url" },
+        { "use": "model_auto", "id": "model_auto" },
+        { "use": "env_key_ts", "id": "env_key" },
+        { "use": "no_key_literal", "id": "no_key" },
+        { "use": "no_sage", "id": "no_sage" }
+      ],
+      "judged": [
+        { "id": "errors", "text": "The endpoint validates the request body and returns a non-2xx error response (not a crash) when the LLM call fails." }
+      ]
+    },
+    {
+      "id": "campaign-email-py",
+      "scaffold": "campaign-email-py",
+      "category": "negative",
+      "should_use_sage": false,
+      "expected_skill": "levanto-llms",
+      "mentions_levanto": true,
+      "prompt": "We use Levanto for our AI features. Add generate_campaign_email(product, audience) to marketing.py that writes a launch email (subject and body) for a product.",
+      "checks": [
+        { "id": "func", "type": "regex", "pattern": "def generate_campaign_email\\(", "desc": "defines generate_campaign_email" },
+        { "use": "llm_base", "id": "base_url" },
+        { "use": "model_auto", "id": "model_auto" },
+        { "use": "env_key_py", "id": "env_key" },
+        { "use": "no_key_literal", "id": "no_key" },
+        { "use": "no_sage", "id": "no_sage" }
+      ],
+      "judged": [
+        { "id": "generates", "text": "The email text is generated by an LLM call (not a fixed template only) and the function returns both a subject and a body." }
+      ]
+    }
+  ]
+}
