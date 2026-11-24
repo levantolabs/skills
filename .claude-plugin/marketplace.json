@@ -1,0 +1,35 @@
+{
+  "$schema": "https://code.claude.com/schemas/marketplace.json",
+  "name": "levanto",
+  "description": "Official Levanto skills for AI coding agents.",
+  "owner": {
+    "name": "Levanto",
+    "email": "team@levanto.ai",
+    "url": "https://levanto.ai"
+  },
+  "plugins": [
+    {
+      "name": "levanto",
+      "source": "./",
+      "description": "Build with Levanto: Sage for fast typed decisions and extraction, and LLMs with a router and open-weight models.",
+      "author": {
+        "name": "Levanto",
+        "email": "team@levanto.ai",
+        "url": "https://levanto.ai"
+      },
+      "homepage": "https://docs.levanto.ai",
+      "repository": "https://github.com/levantolabs/skills",
+      "license": "MIT",
+      "keywords": [
+        "levanto",
+        "sage",
+        "decisions",
+        "classification",
+        "extraction",
+        "llm",
+        "router",
+        "open-weight"
+      ]
+    }
+  ]
+}

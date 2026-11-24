@@ -1,0 +1,42 @@
+{
+  "name": "levanto",
+  "version": "1.0.0",
+  "description": "Build with Levanto: Sage for fast typed decisions and extraction, and LLMs with a router and open-weight models.",
+  "author": {
+    "name": "Levanto",
+    "email": "team@levanto.ai",
+    "url": "https://levanto.ai"
+  },
+  "homepage": "https://docs.levanto.ai",
+  "repository": "https://github.com/levantolabs/skills",
+  "license": "MIT",
+  "keywords": [
+    "levanto",
+    "sage",
+    "decisions",
+    "classification",
+    "extraction",
+    "llm",
+    "router",
+    "open-weight"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Levanto",
+    "shortDescription": "Typed decisions, extraction and LLM routing",
+    "longDescription": "Build with Levanto: Sage for fast typed decisions and extraction, and LLMs with a router and open-weight models.",
+    "developerName": "Levanto",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Write"
+    ],
+    "websiteURL": "https://levanto.ai",
+    "privacyPolicyURL": "https://levanto.ai/privacy",
+    "termsOfServiceURL": "https://levanto.ai/terms",
+    "defaultPrompt": [
+      "Find the places in this codebase where Levanto Sage could replace an LLM prompt that returns a label or a yes/no",
+      "Add a Levanto Sage decision to triage incoming support tickets",
+      "Move this project's LLM calls to Levanto with model auto"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "levanto",
+  "owner": {
+    "name": "Levanto"
+  },
+  "plugins": [
+    {
+      "name": "levanto",
+      "source": "./",
+      "description": "Build with Levanto: Sage for fast typed decisions and extraction, and LLMs with a router and open-weight models."
+    }
+  ]
+}
