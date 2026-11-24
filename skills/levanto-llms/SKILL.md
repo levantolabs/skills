@@ -13,7 +13,7 @@ description: >-
 license: MIT
 metadata:
   author: levanto
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Levanto LLMs
@@ -26,6 +26,7 @@ Before writing an LLM call, check whether the output is really text. If the code
 
 - Base URL: `https://api.levanto.ai/v1` (OpenAI clients), `https://api.levanto.ai` (Anthropic clients).
 - Key: `lv_live_...` from the `LEVANTO_API_KEY` environment variable, the same key as Sage. Never hardcode, log or commit it.
+- Timeouts: set one on every call (60 s is a good start; long generations need more). The router can pick a model that thinks before answering.
 - Model: `"auto"` lets the router pick per request. Or a model id from `GET /v1/models`, such as `deepseek/deepseek-v4-flash`.
 
 ```python
@@ -69,6 +70,8 @@ msg = client.messages.create(model="auto", max_tokens=1024,
 | `GET /v1/models` | The models the key can call, plus `auto` |
 
 All stream with `"stream": true`. Tools, `max_tokens` and the other usual fields work as in the OpenAI and Anthropic APIs.
+
+Not every model supports `response_format` (JSON mode, JSON schema). If the code needs structured output, prefer Sage `extract` or a decision (`levanto-sage` skill); otherwise pin a model that supports it and test it, rather than relying on `"auto"`.
 
 ## The router (`model: "auto"`)
 

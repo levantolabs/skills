@@ -2,7 +2,7 @@
   "$schema": "https://antigravity.google/schemas/v1/plugin.json",
   "name": "levanto",
   "displayName": "Levanto",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Build with Levanto: Sage for fast typed decisions and extraction, and LLMs with a router and open-weight models.",
   "suggestedPrompts": [
     "Where in this codebase could Levanto Sage replace an LLM prompt that returns a label?",

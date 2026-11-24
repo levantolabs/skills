@@ -14,7 +14,7 @@ description: >-
 license: MIT
 metadata:
   author: levanto
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Levanto Sage
@@ -120,6 +120,8 @@ async function decide(content: unknown, question: object, extra: object = {}) {
   return (await res.json()).result;
 }
 ```
+
+When the decision gates something (a refund, a deletion, a send), a failed call (timeout, `402`, `429`, `5xx`) must take the same safe path as `null`, never the "no" branch. Read the key outside the `try`, so a missing key fails loudly instead of routing everything to the default.
 
 Use `probability` only when the workflow needs a stricter bar than Sage's own answer (for example, act automatically only above 0.95). For Choice read `chosen`; for Tags read each tag's `applies`.
 
