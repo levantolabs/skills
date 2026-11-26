@@ -14,7 +14,7 @@ description: >-
 license: MIT
 metadata:
   author: levanto
-  version: "1.0.1"
+  version: "1.0.2"
 ---
 
 # Levanto Sage
@@ -34,7 +34,7 @@ Use Sage when the output is a judgment. Use an LLM (see the `levanto-llms` skill
 
 - Base URL: `https://api.levanto.ai`. Use the user's URL if they give one.
 - Key: `lv_live_...`, read from the `LEVANTO_API_KEY` environment variable and sent as `Authorization: Bearer <key>`. Never hardcode, log or commit it, and never put it in browser code except for the streaming case in `references/stream.md`. If the variable is missing, tell the user to create a key at https://platform.levanto.ai and add it to `.env`.
-- There is no SDK. Call the HTTP API with the project's HTTP client (`fetch`, `httpx`, `requests`…). Wrap it in one small function the rest of the code calls.
+- Call the HTTP API with the project's HTTP client (`fetch`, `httpx`, `requests`…). Wrap it in one small function the rest of the code calls. If the project already uses the Vercel AI SDK or LangChain, read `references/frameworks.md`.
 
 ## Request and response
 
@@ -178,5 +178,6 @@ If a reference file isn't next to this skill, read it at https://github.com/leva
 - `references/images.md`: deciding on screenshots and photos.
 - `references/extract.md`: field types, batch, limits.
 - `references/errors-and-limits.md`: status codes, size limits, pricing.
+- `references/frameworks.md`: Sage in the Vercel AI SDK and LangChain.
 
 Live docs: https://docs.levanto.ai/llms.txt (append `.md` to any docs page for Markdown).

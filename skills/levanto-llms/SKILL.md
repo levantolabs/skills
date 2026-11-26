@@ -13,7 +13,7 @@ description: >-
 license: MIT
 metadata:
   author: levanto
-  version: "1.0.1"
+  version: "1.0.2"
 ---
 
 # Levanto LLMs
@@ -90,7 +90,7 @@ client.chat.completions.create(model="auto", messages=msgs, extra_body={"target"
 
 ## Moving existing code to Levanto
 
-1. Set `base_url` and the key from `LEVANTO_API_KEY`. Keep the existing client library.
+1. Set `base_url` and the key from `LEVANTO_API_KEY`. Keep the existing client library; on the Vercel AI SDK or LangChain, switch to Levanto's package (`references/frameworks.md`).
 2. Replace the model name with `"auto"`, or with the closest id from `GET /v1/models` if the code depends on one model's behaviour.
 3. Keep model-specific settings only if the chosen model supports them; with `"auto"`, prefer portable fields.
 4. Find LLM calls whose output is parsed into a decision or fields, and propose moving those to Sage.
@@ -119,5 +119,6 @@ If a reference file isn't next to this skill, read it at https://github.com/leva
 
 - `references/suggest-only.md`: get a ranked model choice for your own provider, without sending the request through Levanto.
 - `references/coding-tools.md`: run Claude Code, Codex and other coding tools on Levanto's models.
+- `references/frameworks.md`: Levanto's packages for the Vercel AI SDK and LangChain.
 
 Prices and context sizes per model: https://platform.levanto.ai/routing/models. Live docs: https://docs.levanto.ai/llms.txt
