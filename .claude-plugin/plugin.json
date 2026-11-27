@@ -1,7 +1,7 @@
 {
   "name": "levanto",
   "description": "Build with Levanto: Sage for fast typed decisions and extraction, and LLMs with a router and open-weight models.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": {
     "name": "Levanto",
     "email": "team@levanto.ai",

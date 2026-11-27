@@ -14,7 +14,7 @@ description: >-
 license: MIT
 metadata:
   author: levanto
-  version: "1.0.2"
+  version: "1.0.3"
 ---
 
 # Levanto Sage

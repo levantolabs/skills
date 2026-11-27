@@ -88,3 +88,16 @@ response.choices["team"].choice
 - Answers never come back `null`: compare the probability with a threshold.
 - Pass it as `classifier` to LangChain's `AutoModeMiddleware` (blocks risky tool calls) or `ModelRouterMiddleware` (picks a model per run). In TypeScript: `autoModeMiddleware`, `modelRouterMiddleware`.
 - Options: `reasoning` (`"off"`, `"auto"`, `"on"`), `grounding`, `timeout`.
+
+Extraction (0.2.0+) is a LangChain tool:
+
+```python
+from langchain_levanto import LevantoExtractTool
+
+invoices = LevantoExtractTool(fields={"vendor": "the company issuing the invoice", "total": {"type": "money"}})
+invoices.extract(text)["values"]               # {"vendor": ..., "total": {"amount": ..., "currency": ...}}
+create_agent(model, tools=[invoices])          # or give it to an agent
+```
+
+- Fields as in `/v1/extract`. Without `fields`, the agent picks them on each call. A value is `None` (JS `null`) when the text doesn't state it.
+- In an agent, the tool message is the values plus each field's source text and probability; the full response is its `artifact`.
